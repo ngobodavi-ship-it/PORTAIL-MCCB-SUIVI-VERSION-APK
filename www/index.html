@@ -135,7 +135,7 @@ window.envoyerNotifAppelFCM = async function(waAgent, callerName, dossierId) {
     try {
       let numeroComplet = waClean;
       if (numeroComplet.startsWith("0")) {
-        numeroComplet = "242" + numeroComplet.substring(1);
+        numeroComplet = "242" + numeroComplet;
       } else if (!numeroComplet.startsWith("242")) {
         numeroComplet = "242" + numeroComplet;
       }
