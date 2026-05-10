@@ -22421,3 +22421,29 @@ window.addEventListener('load', function() {
 <script src="capacitor-bridge.js"></script>
 </body>
 </html>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// AUTO-REDIRECTION DEPUIS LIEN WHATSAPP
+// Si l'URL contient ?call=..., aller direct sur Agent Acquisition
+// et démarrer l'écoute des appels pour afficher la bannière
+// ═══════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', function() {
+  if (window.location.search.indexOf('call=') > -1) {
+    console.log('[WHATSAPP-LINK] Détection appel entrant via WhatsApp');
+    setTimeout(function() {
+      // 1. Ouvrir Agent Acquisition
+      if (typeof ptAfficher === 'function') {
+        ptAfficher('ecran-acq');
+      }
+      // 2. Démarrer l'écoute des appels (avec le numéro stocké)
+      setTimeout(function() {
+        if (typeof window._ecouterAppelsEntrants === 'function') {
+          window._ecouterAppelsEntrants();
+          console.log('[WHATSAPP-LINK] Écoute des appels démarrée');
+        }
+      }, 1000);
+    }, 800);
+  }
+});
+</script>
