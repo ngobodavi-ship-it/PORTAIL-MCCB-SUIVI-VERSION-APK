@@ -22437,12 +22437,7 @@ window.addEventListener('DOMContentLoaded', function() {
         ptAfficher('ecran-acq');
       }
       // 2. Démarrer l'écoute des appels (avec le numéro stocké)
-      setTimeout(function() {
-        if (typeof window._ecouterAppelsEntrants === 'function') {
-          window._ecouterAppelsEntrants();
-          console.log('[WHATSAPP-LINK] Écoute des appels démarrée');
-        }
-      }, 1000);
+      [800,2500,5000,8000].forEach(function(d){setTimeout(function(){if(typeof window._ecouterAppelsEntrants==="function"){window._ecouterAppelsEntrants();console.log("[WHATSAPP-LINK] Ecoute @"+d+"ms");}},d);});
     }, 800);
   }
 });
