@@ -140,7 +140,7 @@ window.envoyerNotifAppelFCM = async function(waAgent, callerName, dossierId) {
         numeroComplet = "242" + numeroComplet;
       }
       const lienAppel = "https://ngobodavi-ship-it.github.io/PORTAIL-MCCB-SUIVI-VERSION-APK/?call=" + (dossierId || "") + "&autoanswer=1";
-      const messageWA = "🎥 *APPEL VIDÉO MCCB*%0A%0A" + (callerName || "Media Contact") + " vous appelle pour validation KYC.%0A%0A*Cliquez pour rejoindre :*%0A" + encodeURIComponent(lienAppel) + "%0A%0A_Expire dans 5 minutes_";
+      const messageWA = "L'agent certificateur Media Contact vous appelle, aller vite sur l'application Media Contact pour decrocher.";
       const urlWA = "https://wa.me/" + numeroComplet + "?text=" + messageWA;
       window.open(urlWA, "_blank");
       console.log("[WhatsApp] 📱 Ouverture pour " + numeroComplet);
