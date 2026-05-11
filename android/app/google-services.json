@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "65482272143",
+    "firebase_url": "https://portail-mccb-new-default-rtdb.firebaseio.com",
+    "project_id": "portail-mccb-new",
+    "storage_bucket": "portail-mccb-new.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:65482272143:android:77f60a8b30d2b8bd086ffa",
+        "android_client_info": {
+          "package_name": "com.mccb.portail"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDRlqRH0MOvPlirmknf6FUKnEdiNDxLVhY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

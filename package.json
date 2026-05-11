@@ -1,0 +1,27 @@
+{
+  "name": "portail-mccb-suivi-version-apk",
+  "version": "1.0.0",
+  "description": "",
+  "main": "sw.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ngobodavi-ship-it/PORTAIL-MCCB-SUIVI-VERSION-APK.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ngobodavi-ship-it/PORTAIL-MCCB-SUIVI-VERSION-APK/issues"
+  },
+  "homepage": "https://github.com/ngobodavi-ship-it/PORTAIL-MCCB-SUIVI-VERSION-APK#readme",
+  "dependencies": {
+    "@capacitor/android": "^8.3.3",
+    "@capacitor/cli": "^8.3.3",
+    "@capacitor/core": "^8.3.3",
+    "@capacitor/push-notifications": "^8.0.4"
+  }
+}
