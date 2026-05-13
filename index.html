@@ -8828,7 +8828,7 @@ function remplirDetail(d) {
     }
     // Bouton appel vidéo — vérification présence terrain
     const bv = document.createElement('button');
-    bv.className = 'btn-video-call';
+    bv.style.display = "none"; bv.className = "btn-video-call";
     bv.id = 'btn-video-call-' + d.id;
     if (d.appel_video) {
       bv.innerHTML = '✅ Présence certifiée <span class="video-certified-badge">Certifié</span>';
@@ -17332,7 +17332,7 @@ async function soumettre() {
   // pour les agents qui se connectaient sur ordinateur.
   try {
     if (typeof window._ecouterAppelsEntrants === 'function') {
-      window._ecouterAppelsEntrants();
+      // window._ecouterAppelsEntrants(); /* DESACTIVE */
     }
   } catch(e) { console.warn('[APPEL ENTRANT] hook submit KO:', e); }
 
@@ -22437,7 +22437,7 @@ window.addEventListener('DOMContentLoaded', function() {
         ptAfficher('ecran-acq');
       }
       // 2. Démarrer l'écoute des appels (avec le numéro stocké)
-      [800,2500,5000,8000].forEach(function(d){setTimeout(function(){if(typeof window._ecouterAppelsEntrants==="function"){window._ecouterAppelsEntrants();console.log("[WHATSAPP-LINK] Ecoute @"+d+"ms");}},d);});
+      [800,2500,5000,8000].forEach(function(d){setTimeout(function(){if(typeof window._ecouterAppelsEntrants==="function"){// window._ecouterAppelsEntrants(); /* DESACTIVE */console.log("[WHATSAPP-LINK] Ecoute @"+d+"ms");}},d);});
     }, 800);
   }
 });
