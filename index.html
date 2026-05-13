@@ -2059,6 +2059,18 @@ button.acq-back:hover{
 </style>
 
 
+
+<style id="hide-call-buttons">
+/* SUPPRESSION BOUTONS APPEL VIDEO */
+.btn-call-mc, 
+[onclick*="appelerAgent"],
+[onclick*="declencherSon"],
+[onclick*="debloquerAudio"],
+button:has(span:contains("Appeler un agent")),
+button:has(span:contains("Activer le son")) {
+  display: none !important;
+}
+</style>
 </head>
 <body>
 
@@ -20323,7 +20335,7 @@ function _afficherBoutonActiverSon() {
   if (_audioActiveBouton) return; // déjà affiché
   var btn = document.createElement('button');
   btn.id = 'btn-activer-son';
-  btn.innerHTML = '🔊 Activer le son des appels';
+  btn.innerHTML = '🔊 Activer le son des appels'; btn.style.display='none'; /* DESACTIVE */
   btn.style.cssText = 'position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:9998;padding:14px 22px;background:linear-gradient(135deg,#FFC300,#FFA500);color:#1A1A1A;border:none;border-radius:30px;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(255,195,0,0.5);animation:btnPulseSon 1.5s infinite;letter-spacing:0.3px';
   btn.onclick = function() {
     _debloquerAudioContextIOS();
