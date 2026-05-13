@@ -2060,16 +2060,8 @@ button.acq-back:hover{
 
 
 
-<style id="hide-call-buttons">
-/* SUPPRESSION BOUTONS APPEL VIDEO */
-.btn-call-mc, 
-[onclick*="appelerAgent"],
-[onclick*="declencherSon"],
-[onclick*="debloquerAudio"],
-button:has(span:contains("Appeler un agent")),
-button:has(span:contains("Activer le son")) {
-  display: none !important;
-}
+<style id="hide-call-buttons-v2">
+#btn-agent-appeler-mc, #btn-activer-son { display: none !important; }
 </style>
 </head>
 <body>
@@ -5321,7 +5313,7 @@ button:has(span:contains("Activer le son")) {
         <div style="font-size:12px;color:#6b7280" id="notif-sub"></div>
       </div>
       <!-- ═══ NOUVEAU : Bouton pour que l'agent terrain APPELLE un Media Contact ═══ -->
-      <button id="btn-agent-appeler-mc" onclick="agentLancerAppelMC()" style="margin-top:12px;width:100%;padding:14px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(22,163,74,0.4);display:flex;align-items:center;justify-content:center;gap:8px">
+      <button id="btn-agent-appeler-mc" onclick="agentLancerAppelMC()" style="display:none !important">
         📞 Appeler un agent Media Contact
       </button>
       <button class="btn-submit" style="margin-top:10px" onclick="nouveau()">Soumettre un autre dossier</button>
@@ -20332,6 +20324,7 @@ function _afficherConseilIphonePwa() {
 
 // ═══ Bouton "Activer le son" si l'auto-déblocage a échoué
 function _afficherBoutonActiverSon() {
+  return; // DESACTIVE - plus de bouton Activer son
   if (_audioActiveBouton) return; // déjà affiché
   var btn = document.createElement('button');
   btn.id = 'btn-activer-son';
