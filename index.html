@@ -17547,8 +17547,8 @@ function majSurveillanceAgentTerrain(liste) {
     // ═══ FIX : Si le dossier est CLÔTURÉ (accepté ou rejeté), afficher le résultat
     //     immédiatement, peu importe quand il a été clôturé.
     //     Cela couvre le cas où l'agent resoumet un numéro déjà traité.
-    var estCloture = (dossier.statut === 'accepte' || dossier.statut === 'rejete')
-                     && dossier.heure_cloture;
+    // FIX : statut suffit, on n'attend plus heure_cloture (parfois pas synchronisé à temps via Firebase)
+    var estCloture = (dossier.statut === 'accepte' || dossier.statut === 'rejete');
     if (estCloture) {
       delete dossiersSurveilles[dossierId];
       afficherResultat(dossier.statut, numMTN, dossier.raison_rejet || '');
