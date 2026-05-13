@@ -17053,15 +17053,14 @@ function restaurerNotificationDossierEnCours() {
   var liste = (window._cacheDossiersFB && window._cacheDossiersFB.length)
     ? window._cacheDossiersFB
     : JSON.parse(localStorage.getItem(CLE_DOSSIERS) || '[]');
-  // Filtrer les dossiers de cet agent NON encore clôturés
-  var enCoursOuAttente = liste.filter(function(d) {
-    return d.wa_agent === waAgent
-      && (d.statut === 'en_attente' || d.statut === 'en_cours');
+  // FIX : Inclure aussi accepte/rejete pour afficher le resultat final
+  var tousLesDossiers = liste.filter(function(d) {
+    return d.wa_agent === waAgent;
   });
-  if (!enCoursOuAttente.length) return;
-  // Prendre le plus récent
-  enCoursOuAttente.sort(function(a, b) { return (b.created_at || 0) - (a.created_at || 0); });
-  var dernier = enCoursOuAttente[0];
+  if (!tousLesDossiers.length) return;
+  // Prendre le plus recent
+  tousLesDossiers.sort(function(a, b) { return (b.created_at || 0) - (a.created_at || 0); });
+  var dernier = tousLesDossiers[0];
   // Vérifier que la zone de notification existe (uniquement sur l'écran agent acquisition)
   var notif = document.getElementById('notif-statut');
   if (!notif) return;
@@ -17097,7 +17096,13 @@ function restaurerNotificationDossierEnCours() {
     notifEnCours: dernier.statut === 'en_cours' // déjà notifié si déjà en_cours
   };
   // Afficher la notification appropriée
-  if (dernier.statut === 'en_cours') {
+  if (dernier.statut === 'accepte' || dernier.statut === 'rejete') {
+    // FIX : afficher le resultat final
+    var numMtn = (dernier.numeros_all || [dernier.numero_mtn]).filter(Boolean).join(' / ');
+    if (typeof afficherResultat === 'function') {
+      afficherResultat(dernier.statut, numMtn, dernier.raison_rejet || '');
+    }
+  } else if (dernier.statut === 'en_cours') {
     if (typeof afficherEnCoursTraitement === 'function') {
       afficherEnCoursTraitement(dernier.agent_saisie || '');
     }
