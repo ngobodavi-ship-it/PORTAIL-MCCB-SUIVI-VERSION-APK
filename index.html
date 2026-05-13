@@ -8805,15 +8805,8 @@ function remplirDetail(d) {
       // ═══ FIX BUG : relire la version FRAÎCHE de dossiers[d.id] au moment du clic ═══
       // Sinon on utilise un snapshot figé qui ne voit pas les mises à jour de certifierPresence()
       b.onclick = function() {
-        var dFrais = dossiers[d.id] || d;  // fallback sur d figé si jamais
-        var aPasseAppel = !!dFrais.appel_video;
-        if (!aPasseAppel) {
-          // Pas d'appel vidéo : avertissement DANGER avant la modal finale
-          ouvrirModalDangerSansAppel(d.id, i === 0 ? 'accepter' : 'rejeter');
-        } else {
-          // Appel vidéo bien fait : action directe
-          if (i === 0) ouvrirModalAccepter(d.id); else ouvrirModalRejeter(d.id);
-        }
+        // Action directe sans verification appel video
+        if (i === 0) ouvrirModalAccepter(d.id); else ouvrirModalRejeter(d.id);
       };
       acts.appendChild(b);
     });
