@@ -3300,13 +3300,14 @@ label:has(#mod-ecoute) {
 
     <!-- BLOC ALERTE DOSSIERS EN RETARD -->
     <div id="sup-retard-bloc" style="display:none;background:#fff;border-radius:12px;border:2px solid #dc2626;overflow:hidden;margin-bottom:16px;box-shadow:0 4px 16px rgba(220,38,38,.15)">
-      <div style="background:#dc2626;padding:10px 16px;display:flex;align-items:center;gap:10px">
+      <div style="background:#dc2626;padding:10px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none" onclick="toggleRetardBloc()">
         <span style="font-size:18px;animation:flash-bg .8s infinite">⚠</span>
         <div style="flex:1">
           <div style="font-size:13px;font-weight:800;color:#fff">Dossiers dépassant le seuil d'alerte</div>
           <div style="font-size:11px;color:rgba(255,255,255,.8);margin-top:1px" id="sup-retard-sous-titre">Seuil fixé par l'Admin</div>
         </div>
         <div style="background:rgba(255,255,255,.25);border-radius:20px;padding:4px 12px;font-size:20px;font-weight:900;color:#fff" id="sup-retard-count">0</div>
+        <span id="sup-retard-toggle" style="color:#fff;font-size:18px;font-weight:900;margin-left:6px">v</span>
       </div>
       <div style="overflow-x:auto">
         <table style="width:100%;border-collapse:collapse;font-size:12px">
@@ -22474,7 +22475,7 @@ window.addEventListener('load', function() {
   setInterval(hideCallSections, 2000);
 })();
 </script>
-</body>
+<script id="toggle-retard-js">function toggleRetardBloc(){var t=document.querySelector("#sup-retard-bloc > div[style*=\"overflow-x:auto\"]");var b=document.getElementById("sup-retard-toggle");if(!t||!b)return;if(t.style.display==="none"){t.style.display="block";b.textContent="v";}else{t.style.display="none";b.textContent=">";}}</script></body>
 </html>
 
 <script>
