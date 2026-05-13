@@ -22475,7 +22475,30 @@ window.addEventListener('load', function() {
   setInterval(hideCallSections, 2000);
 })();
 </script>
-<script id="toggle-retard-js">function toggleRetardBloc(){var t=document.querySelector("#sup-retard-bloc > div[style*=\"overflow-x:auto\"]");var b=document.getElementById("sup-retard-toggle");if(!t||!b)return;if(t.style.display==="none"){t.style.display="block";b.textContent="v";}else{t.style.display="none";b.textContent=">";}}</script></body>
+<script id="toggle-retard-v2">
+function toggleRetardBloc() {
+  var bloc = document.getElementById('sup-retard-bloc');
+  if (!bloc) return;
+  // Trouver le conteneur du tableau (le div avec overflow-x:auto)
+  var tableContainer = bloc.querySelector('div[style*="overflow-x"]');
+  var toggle = document.getElementById('sup-retard-toggle');
+  if (!tableContainer || !toggle) return;
+  
+  // Verifier l'etat actuel
+  var estPlie = tableContainer.style.display === 'none';
+  
+  if (estPlie) {
+    // DEPLIER
+    tableContainer.style.display = 'block';
+    toggle.textContent = '\u25bc';
+  } else {
+    // PLIER  
+    tableContainer.style.display = 'none';
+    toggle.textContent = '\u25b6';
+  }
+}
+</script>
+</body>
 </html>
 
 <script>
