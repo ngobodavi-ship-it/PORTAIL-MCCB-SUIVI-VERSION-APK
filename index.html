@@ -8832,7 +8832,7 @@ function remplirDetail(d) {
       bv.innerHTML = '📹 Appel vidéo terrain';
       bv.onclick = () => lancerAppelVideo(d.id);
     }
-    acts.appendChild(bv);
+    /* APPEL VIDEO DESACTIVE */ // acts.appendChild(bv);
 
     // Si dossier validé sans appel vidéo : afficher un badge informatif
     if (d.valide_sans_appel) {
@@ -19828,7 +19828,7 @@ async function terminerAppel(notifyFirebase) {
         btnV.innerHTML = '✅ Présence certifiée <span class="video-certified-badge">Certifié</span>';
         btnV.style.cssText = 'background:#f0fdf4;color:#16a34a;border-color:#86efac';
       } else {
-        btnV.innerHTML = '📹 Appel vidéo terrain';
+        btnV.style.display = 'none'; // APPEL VIDEO DESACTIVE
         btnV.className = 'btn-video-call';
         btnV.style.cssText = '';
       }
@@ -20521,7 +20521,7 @@ function _arreterSonAppel() {
 // ── Réinitialiser l'état de la modal vidéo ────────────────────
 function _resetModalVideo(role) {
   var isTerrain = (role === 'callee');
-  document.getElementById('vid-hdr-title').textContent    = '📹 Appel vidéo';
+  /* APPEL VIDEO DESACTIVE */ return;
   document.getElementById('vid-hdr-dossier').textContent  = '—';
   document.getElementById('vid-status').className         = 'vid-status attente';
   document.getElementById('vid-status').textContent       = '⏳ Connexion...';
