@@ -2063,6 +2063,25 @@ button.acq-back:hover{
 <style id="hide-call-buttons-v2">
 #btn-agent-appeler-mc, #btn-activer-son { display: none !important; }
 </style>
+<style id="hide-all-call-features">
+/* MASQUAGE DES FONCTIONNALITES D'APPEL VIDEO */
+
+/* Vue Ecoute qualite */
+#vue-ecoute,
+#tab-ecoute,
+#sb-ecoute,
+#mod-ecoute,
+label:has(#mod-ecoute) {
+  display: none !important;
+}
+
+/* Sections Rapport des appels video et Enregistrements audio (par contenu) */
+#admkyc-rapport-appels-contenu,
+[onclick*="rapportAppelsRafraichir"],
+[onclick*="rapportAppelsExporter"] {
+  display: none !important;
+}
+</style>
 </head>
 <body>
 
@@ -22422,6 +22441,39 @@ window.addEventListener('load', function() {
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@capacitor/core@7/dist/capacitor.js"></script>
 <script src="capacitor-bridge.js"></script>
+
+<script id="hide-call-sections-js">
+(function() {
+  function hideCallSections() {
+    // Cacher la section "Rapport des appels video" et son contenu (jusqu'au prochain separateur)
+    var titres = document.querySelectorAll('span');
+    titres.forEach(function(t) {
+      if (t.textContent && (
+        t.textContent.indexOf('Rapport des appels vidéo') !== -1 ||
+        t.textContent.indexOf('Enregistrements audio des appels') !== -1
+      )) {
+        // Cacher le parent separateur
+        var sep = t.closest('div[style*="margin:24px"]');
+        if (sep) {
+          sep.style.display = 'none';
+          // Cacher aussi le bloc suivant (le contenu)
+          var next = sep.nextElementSibling;
+          if (next) next.style.display = 'none';
+        }
+      }
+    });
+  }
+  
+  // Lancer apres chargement et a chaque navigation
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', hideCallSections);
+  } else {
+    hideCallSections();
+  }
+  // Re-cacher periodiquement au cas ou
+  setInterval(hideCallSections, 2000);
+})();
+</script>
 </body>
 </html>
 
