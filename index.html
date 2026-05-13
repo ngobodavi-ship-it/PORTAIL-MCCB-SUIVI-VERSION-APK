@@ -3319,6 +3319,7 @@ label:has(#mod-ecoute) {
               <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#dc2626;border-bottom:1px solid #fca5a5;white-space:nowrap">Heure</th>
               <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#dc2626;border-bottom:1px solid #fca5a5;white-space:nowrap">Temps écoulé</th>
               <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#dc2626;border-bottom:1px solid #fca5a5;white-space:nowrap">Dépassement</th>
+              <th style="padding:8px 12px;text-align:center;font-size:10px;font-weight:700;color:#dc2626;border-bottom:1px solid #fca5a5;white-space:nowrap">Transfert</th>
             </tr>
           </thead>
           <tbody id="sup-retard-tbody"></tbody>
@@ -22500,6 +22501,51 @@ function toggleRetardBloc() {
     toggle.textContent = '\u25b6';
   }
 }
+</script>
+
+<script id="injecter-btn-transfert-retard">
+(function() {
+  function injecterBoutonsTransfert() {
+    var tbody = document.getElementById('sup-retard-tbody');
+    if (!tbody) return;
+    var lignes = tbody.querySelectorAll('tr');
+    lignes.forEach(function(tr) {
+      // Eviter de re-ajouter le bouton si deja present
+      if (tr.querySelector('.btn-transfert-retard')) return;
+      // Recuperer le numero MTN dans la premiere cellule
+      var firstTd = tr.querySelector('td');
+      if (!firstTd) return;
+      var numeroMtn = firstTd.textContent.trim().replace(/\D/g, '').substring(0, 9);
+      // Trouver le dossier correspondant
+      var dossierId = null;
+      if (typeof dossiers === 'object' && dossiers) {
+        for (var k in dossiers) {
+          var d = dossiers[k];
+          if (d && (d.numero_mtn === numeroMtn || (d.numeros_all && d.numeros_all.indexOf(numeroMtn) !== -1))) {
+            dossierId = k;
+            break;
+          }
+        }
+      }
+      // Ajouter la cellule avec le bouton
+      var td = document.createElement('td');
+      td.style.cssText = 'padding:6px 12px;text-align:center;border-bottom:1px solid #fca5a5;background:#fff8e1';
+      if (dossierId && typeof ouvrirTransfert === 'function') {
+        td.innerHTML = '<button class="btn-transfert-retard" onclick="ouvrirTransfert(\''+dossierId+'\')" style="padding:5px 10px;background:#dc2626;color:#fff;border:none;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer">🔀 Transférer</button>';
+      } else {
+        td.innerHTML = '<span style="color:#9ca3af;font-size:10px">—</span>';
+      }
+      tr.appendChild(td);
+    });
+  }
+  // Lancer regulierement (le tableau se met a jour)
+  setInterval(injecterBoutonsTransfert, 1500);
+  if (document.readyState !== 'loading') {
+    injecterBoutonsTransfert();
+  } else {
+    document.addEventListener('DOMContentLoaded', injecterBoutonsTransfert);
+  }
+})();
 </script>
 </body>
 </html>
