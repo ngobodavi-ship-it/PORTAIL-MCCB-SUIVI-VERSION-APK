@@ -1100,14 +1100,14 @@ canvas{max-height:200px}
 #notif-msg{position:fixed;bottom:20px;right:20px;z-index:99999;width:340px;max-width:90vw;display:none;animation:slideInRight .4s ease}
 @keyframes slideInRight { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } } @keyframes dropIn{from{transform:translateX(-50%) translateY(-20px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
 .notif-msg-box{border-radius:12px;padding:14px 18px;display:flex;align-items:flex-start;gap:12px;box-shadow:0 8px 30px rgba(0,0,0,.2)}
-.notif-msg-box.normal{background:#1A1A1A;border-left:5px solid var(--o)}
+.notif-msg-box.normal{background:linear-gradient(135deg,#1e40af,#1e3a8a);border-left:5px solid #fbbf24}
 .notif-msg-box.urgent{background:#dc2626;animation:urgentPulse 1s infinite}
 @keyframes urgentPulse{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.4)}50%{box-shadow:0 0 0 10px rgba(220,38,38,0)}}
 .notif-msg-ico{font-size:22px;flex-shrink:0}
 .notif-msg-txt{flex:1}
 .notif-msg-from{font-size:10px;font-weight:700;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.4px}
 .notif-msg-content{font-size:13px;font-weight:600;color:#fff;margin-top:2px;line-height:1.4}
-.notif-msg-close{background:rgba(255,255,255,.2);border:none;border-radius:6px;color:#fff;font-size:16px;cursor:pointer;padding:2px 8px;flex-shrink:0}
+.notif-msg-close{background:rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.4);border-radius:50%;color:#fff;font-size:18px;font-weight:bold;cursor:pointer;padding:0;width:28px;height:28px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}.notif-msg-close:hover{background:rgba(255,255,255,.5);transform:scale(1.1)}
 /* Historique messages dans vue sup */
 .msg-hist-item{padding:10px 14px;border-radius:8px;margin-bottom:6px;display:flex;align-items:flex-start;gap:10px}
 .msg-hist-item.normal{background:#fff8e1;border-left:3px solid var(--o)}
