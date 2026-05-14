@@ -5307,6 +5307,27 @@ label:has(#mod-ecoute) {
           <input type="text" id="username-agent" placeholder="ex: dav_centre" maxlength="40" autocomplete="off" style="width:100%;padding:12px;border:1.5px solid var(--bd);border-radius:8px;font-size:16px;outline:none;-webkit-appearance:none;box-sizing:border-box">
           <div class="hint">Entrez votre username une seule fois — il sera mémorisé automatiquement</div>
         </div>
+        <div class="fld" style="margin-bottom:6px">
+          <label>Fonction <span>*</span></label>
+          <select id="fonction-agent" style="width:100%;padding:12px;border:1.5px solid var(--bd);border-radius:8px;font-size:16px;outline:none;background:#fff;box-sizing:border-box;cursor:pointer">
+            <option value="">-- Selectionnez votre fonction --</option>
+            <option value="Agent Acquisition">Agent Acquisition</option>
+            <option value="Agent Frontoffice">Agent Frontoffice</option>
+            <option value="Agent EBU">Agent EBU</option>
+            <option value="Autre">Autre</option>
+          </select>
+        </div>
+        <div class="fld" style="margin-bottom:6px">
+          <label>Zone <span>*</span></label>
+          <select id="zone-agent" style="width:100%;padding:12px;border:1.5px solid var(--bd);border-radius:8px;font-size:16px;outline:none;background:#fff;box-sizing:border-box;cursor:pointer">
+            <option value="">-- Selectionnez votre zone --</option>
+            <option value="Brazzaville">Brazzaville</option>
+            <option value="Pointe-Noire">Pointe-Noire</option>
+            <option value="Hinterland Nord">Hinterland Nord</option>
+            <option value="Hinterland Sud">Hinterland Sud</option>
+            <option value="Autre">Autre</option>
+          </select>
+        </div>
       </div>
 
       <div class="section-title">Numéros à identifier</div>
@@ -17163,15 +17184,19 @@ seDeconnecter = function() {
 
 var CLE_AGENT   = 'mcc_wa_agent';
 var CLE_USERNAME = 'mcc_username_agent';
+var CLE_FONCTION = 'mcc_fonction_agent';
+var CLE_ZONE = 'mcc_zone_agent';
 // CLE_DOSSIERS partagé avec MC
 
 /* ── Agent mémorisé ── */
 function chargerAgent() {
   var num = localStorage.getItem(CLE_AGENT);
   var usr = localStorage.getItem(CLE_USERNAME);
-  if (num && usr) {
+  var fct = localStorage.getItem(CLE_FONCTION);
+  var zon = localStorage.getItem(CLE_ZONE);
+  if (num && usr && fct && zon) {
     var disp = document.getElementById('agent-num-display');
-    if (disp) disp.innerHTML = num + ' <span style="font-size:12px;color:#6b7280;font-weight:500">(@' + usr + ')</span>';
+    if (disp) disp.innerHTML = num + ' <span style="font-size:12px;color:#6b7280;font-weight:500">(@' + usr + ')</span><br><span style="font-size:11px;color:#374151;font-weight:600;margin-top:2px;display:inline-block">📋 ' + fct + ' • 📍 ' + zon + '</span>';
     document.getElementById('agent-saved').style.display = 'block';
     document.getElementById('agent-input').style.display  = 'none';
   } else {
@@ -17179,13 +17204,19 @@ function chargerAgent() {
     document.getElementById('agent-input').style.display  = 'block';
     if (num) { var w = document.getElementById('wa-agent'); if (w) w.value = num; }
     if (usr) { var u = document.getElementById('username-agent'); if (u) u.value = usr; }
+    if (fct) { var f = document.getElementById('fonction-agent'); if (f) f.value = fct; }
+    if (zon) { var z = document.getElementById('zone-agent'); if (z) z.value = zon; }
   }
 }
 function changerAgent() {
   localStorage.removeItem(CLE_AGENT);
   localStorage.removeItem(CLE_USERNAME);
+  localStorage.removeItem(CLE_FONCTION);
+  localStorage.removeItem(CLE_ZONE);
   document.getElementById('wa-agent').value = '';
   var u = document.getElementById('username-agent'); if (u) u.value = '';
+  var f = document.getElementById('fonction-agent'); if (f) f.value = '';
+  var z = document.getElementById('zone-agent'); if (z) z.value = '';
   document.getElementById('agent-saved').style.display = 'none';
   document.getElementById('agent-input').style.display  = 'block';
   document.getElementById('wa-agent').focus();
@@ -17473,6 +17504,12 @@ async function soumettre() {
   if (!usernameAgent) { afficherErreur("Entrez votre username."); return; }
   if (usernameAgent.length < 2) { afficherErreur("Le username doit contenir au moins 2 caracteres."); return; }
   localStorage.setItem(CLE_USERNAME, usernameAgent);
+  var fonctionAgent = (localStorage.getItem(CLE_FONCTION) || (document.getElementById('fonction-agent') ? document.getElementById('fonction-agent').value : '')).trim();
+  if (!fonctionAgent) { afficherErreur("Selectionnez votre fonction."); return; }
+  localStorage.setItem(CLE_FONCTION, fonctionAgent);
+  var zoneAgent = (localStorage.getItem(CLE_ZONE) || (document.getElementById('zone-agent') ? document.getElementById('zone-agent').value : '')).trim();
+  if (!zoneAgent) { afficherErreur("Selectionnez votre zone."); return; }
+  localStorage.setItem(CLE_ZONE, zoneAgent);
   if (!num1)    { afficherErreur("Entrez au moins le numéro MTN 1."); return; }
   if (num1.length !== 9) { afficherErreur("Le numéro MTN 1 doit contenir exactement 9 chiffres."); return; }
 
@@ -17547,6 +17584,8 @@ async function soumettre() {
       id:              id,
       wa_agent:        waAgent,
       username_agent:  usernameAgent,
+      fonction_agent:  fonctionAgent,
+      zone_agent:      zoneAgent,
       numero_mtn:      numeros[0],          // numéro principal
       numeros_all:     numeros,             // tous les numéros
       heure_reception: heure,
