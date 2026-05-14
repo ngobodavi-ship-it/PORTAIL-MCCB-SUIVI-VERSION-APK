@@ -3593,7 +3593,64 @@ label:has(#mod-ecoute) {
 
       </div>
 
-      <!-- ═══ SECTION : Rapport appels vidéo (style Hermès) ═══ -->
+      <!-- Separateur Agents Acquisition / Front Office -->
+      <div style="display:flex;align-items:center;gap:10px;margin:24px 0 14px">
+        <div style="flex:1;height:1px;background:var(--bd)"></div>
+        <span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">👥 Agents Acquisition & Front Office</span>
+        <div style="flex:1;height:1px;background:var(--bd)"></div>
+      </div>
+
+      <!-- 3 rapports AA/FO en grille -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px">
+
+        <!-- Rapport par USERNAME -->
+        <div class="card" style="border:1.5px solid #e9d5ff;background:#faf5ff">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+            <div style="width:38px;height:38px;border-radius:10px;background:#7c3aed;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">👤</div>
+            <div>
+              <div style="font-size:13px;font-weight:800;color:#581c87">Par Username</div>
+              <div style="font-size:10px;color:#6b7280">Detail par agent</div>
+            </div>
+          </div>
+          <div style="font-size:11px;color:#6b7280;margin-bottom:12px;line-height:1.6">
+            Volume recu, accepte, rejete et en cours pour chaque agent acquisition / front office.
+          </div>
+          <button onclick="exporterReporting('aafo_username')" style="width:100%;padding:10px;border:none;border-radius:8px;background:#7c3aed;color:#fff;font-size:12px;font-weight:700;cursor:pointer">⬇ Par Username (.xlsx)</button>
+        </div>
+
+        <!-- Rapport par ZONE -->
+        <div class="card" style="border:1.5px solid #bbf7d0;background:#f0fdf4">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+            <div style="width:38px;height:38px;border-radius:10px;background:#16a34a;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📍</div>
+            <div>
+              <div style="font-size:13px;font-weight:800;color:#14532d">Par Zone</div>
+              <div style="font-size:10px;color:#6b7280">Regroupement geographique</div>
+            </div>
+          </div>
+          <div style="font-size:11px;color:#6b7280;margin-bottom:12px;line-height:1.6">
+            Volume recu, accepte, rejete et taux par zone (Brazzaville, Pointe-Noire, Hinterland...).
+          </div>
+          <button onclick="exporterReporting('aafo_zone')" style="width:100%;padding:10px;border:none;border-radius:8px;background:#16a34a;color:#fff;font-size:12px;font-weight:700;cursor:pointer">⬇ Par Zone (.xlsx)</button>
+        </div>
+
+        <!-- Rapport par FONCTION -->
+        <div class="card" style="border:1.5px solid #fbcfe8;background:#fdf2f8">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+            <div style="width:38px;height:38px;border-radius:10px;background:#db2777;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📋</div>
+            <div>
+              <div style="font-size:13px;font-weight:800;color:#831843">Par Fonction</div>
+              <div style="font-size:10px;color:#6b7280">Type d agent</div>
+            </div>
+          </div>
+          <div style="font-size:11px;color:#6b7280;margin-bottom:12px;line-height:1.6">
+            Volume recu, accepte, rejete et taux par fonction (Acquisition, Frontoffice, EBU, Autre).
+          </div>
+          <button onclick="exporterReporting('aafo_fonction')" style="width:100%;padding:10px;border:none;border-radius:8px;background:#db2777;color:#fff;font-size:12px;font-weight:700;cursor:pointer">⬇ Par Fonction (.xlsx)</button>
+        </div>
+
+      </div>
+
+      <!-- Separateur Rapport appels video -->
       <div style="display:flex;align-items:center;gap:10px;margin:24px 0 14px">
         <div style="flex:1;height:1px;background:var(--bd)"></div>
         <span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">📞 Rapport des appels vidéo</span>
@@ -10988,7 +11045,7 @@ function exporterReporting(quoi) {
   if (debut > fin)    { toast('⚠ La date de début doit être avant la date de fin.', 'er'); return; }
 
   // Rapports de production — traitement direct
-  if (['prod_agent','prod_global','heures_agents','rejets_acceptations','traitement_heure'].includes(quoi)) {
+  if (['prod_agent','prod_global','heures_agents','rejets_acceptations','traitement_heure','aafo_username','aafo_zone','aafo_fonction'].includes(quoi)) {
     genererRapportProduction(quoi, debut, fin);
     return;
   }
@@ -11139,6 +11196,122 @@ function exporterPeriodeAvecDates(quoi, debut, fin) {
 }
 
 // ── Générateur des rapports de production ─────────────────────
+function genererRapportAAFOUsername(debut, fin) {
+  var dDebut = new Date(debut + "T00:00:00");
+  var dFin = new Date(fin + "T23:59:59");
+  var tous = JSON.parse(localStorage.getItem(CLE_DOSSIERS) || "[]");
+  var liste = tous.filter(function(d){
+    if (!d.created_at) return false;
+    var dt = new Date(d.created_at * 1000);
+    return dt >= dDebut && dt <= dFin && d.username_agent;
+  });
+  if (liste.length === 0) {
+    toast("Aucun dossier avec username dans la periode", "er");
+    return;
+  }
+  var par = {};
+  liste.forEach(function(d){
+    var k = d.username_agent;
+    if (!par[k]) par[k] = { username: k, fonction: d.fonction_agent || "-", zone: d.zone_agent || "-", recus: 0, acceptes: 0, rejetes: 0, en_cours: 0, en_attente: 0 };
+    par[k].recus++;
+    if (d.statut === "accepte") par[k].acceptes++;
+    else if (d.statut === "rejete") par[k].rejetes++;
+    else if (d.statut === "en_cours") par[k].en_cours++;
+    else if (d.statut === "en_attente") par[k].en_attente++;
+  });
+  var rows = Object.values(par).sort(function(a,b){ return b.recus - a.recus; });
+  var wb = XLSX.utils.book_new();
+  var data = [["Username","Fonction","Zone","Recus","Acceptes","Rejetes","En cours","En attente","Taux acceptation"]];
+  rows.forEach(function(r){
+    var traites = r.acceptes + r.rejetes;
+    var taux = traites > 0 ? Math.round(r.acceptes/traites*100) + "%" : "-";
+    data.push([r.username, r.fonction, r.zone, r.recus, r.acceptes, r.rejetes, r.en_cours, r.en_attente, taux]);
+  });
+  var ws = XLSX.utils.aoa_to_sheet(data);
+  ws["!cols"] = [{wch:18},{wch:18},{wch:16},{wch:8},{wch:10},{wch:8},{wch:9},{wch:11},{wch:14}];
+  XLSX.utils.book_append_sheet(wb, ws, "Par Username");
+  XLSX.writeFile(wb, "aafo_par_username_" + debut + "_au_" + fin + ".xlsx");
+  toast("Rapport exporte (" + rows.length + " agents)", "ok");
+}
+
+function genererRapportAAFOZone(debut, fin) {
+  var dDebut = new Date(debut + "T00:00:00");
+  var dFin = new Date(fin + "T23:59:59");
+  var tous = JSON.parse(localStorage.getItem(CLE_DOSSIERS) || "[]");
+  var liste = tous.filter(function(d){
+    if (!d.created_at) return false;
+    var dt = new Date(d.created_at * 1000);
+    return dt >= dDebut && dt <= dFin && d.zone_agent;
+  });
+  if (liste.length === 0) {
+    toast("Aucun dossier avec zone dans la periode", "er");
+    return;
+  }
+  var par = {};
+  liste.forEach(function(d){
+    var k = d.zone_agent;
+    if (!par[k]) par[k] = { zone: k, agents: new Set(), recus: 0, acceptes: 0, rejetes: 0, en_cours: 0, en_attente: 0 };
+    par[k].recus++;
+    if (d.username_agent) par[k].agents.add(d.username_agent);
+    if (d.statut === "accepte") par[k].acceptes++;
+    else if (d.statut === "rejete") par[k].rejetes++;
+    else if (d.statut === "en_cours") par[k].en_cours++;
+    else if (d.statut === "en_attente") par[k].en_attente++;
+  });
+  var rows = Object.values(par).sort(function(a,b){ return b.recus - a.recus; });
+  var wb = XLSX.utils.book_new();
+  var data = [["Zone","Nb agents","Recus","Acceptes","Rejetes","En cours","En attente","Taux acceptation"]];
+  rows.forEach(function(r){
+    var traites = r.acceptes + r.rejetes;
+    var taux = traites > 0 ? Math.round(r.acceptes/traites*100) + "%" : "-";
+    data.push([r.zone, r.agents.size, r.recus, r.acceptes, r.rejetes, r.en_cours, r.en_attente, taux]);
+  });
+  var ws = XLSX.utils.aoa_to_sheet(data);
+  ws["!cols"] = [{wch:18},{wch:10},{wch:8},{wch:10},{wch:8},{wch:9},{wch:11},{wch:14}];
+  XLSX.utils.book_append_sheet(wb, ws, "Par Zone");
+  XLSX.writeFile(wb, "aafo_par_zone_" + debut + "_au_" + fin + ".xlsx");
+  toast("Rapport exporte (" + rows.length + " zones)", "ok");
+}
+
+function genererRapportAAFOFonction(debut, fin) {
+  var dDebut = new Date(debut + "T00:00:00");
+  var dFin = new Date(fin + "T23:59:59");
+  var tous = JSON.parse(localStorage.getItem(CLE_DOSSIERS) || "[]");
+  var liste = tous.filter(function(d){
+    if (!d.created_at) return false;
+    var dt = new Date(d.created_at * 1000);
+    return dt >= dDebut && dt <= dFin && d.fonction_agent;
+  });
+  if (liste.length === 0) {
+    toast("Aucun dossier avec fonction dans la periode", "er");
+    return;
+  }
+  var par = {};
+  liste.forEach(function(d){
+    var k = d.fonction_agent;
+    if (!par[k]) par[k] = { fonction: k, agents: new Set(), recus: 0, acceptes: 0, rejetes: 0, en_cours: 0, en_attente: 0 };
+    par[k].recus++;
+    if (d.username_agent) par[k].agents.add(d.username_agent);
+    if (d.statut === "accepte") par[k].acceptes++;
+    else if (d.statut === "rejete") par[k].rejetes++;
+    else if (d.statut === "en_cours") par[k].en_cours++;
+    else if (d.statut === "en_attente") par[k].en_attente++;
+  });
+  var rows = Object.values(par).sort(function(a,b){ return b.recus - a.recus; });
+  var wb = XLSX.utils.book_new();
+  var data = [["Fonction","Nb agents","Recus","Acceptes","Rejetes","En cours","En attente","Taux acceptation"]];
+  rows.forEach(function(r){
+    var traites = r.acceptes + r.rejetes;
+    var taux = traites > 0 ? Math.round(r.acceptes/traites*100) + "%" : "-";
+    data.push([r.fonction, r.agents.size, r.recus, r.acceptes, r.rejetes, r.en_cours, r.en_attente, taux]);
+  });
+  var ws = XLSX.utils.aoa_to_sheet(data);
+  ws["!cols"] = [{wch:20},{wch:10},{wch:8},{wch:10},{wch:8},{wch:9},{wch:11},{wch:14}];
+  XLSX.utils.book_append_sheet(wb, ws, "Par Fonction");
+  XLSX.writeFile(wb, "aafo_par_fonction_" + debut + "_au_" + fin + ".xlsx");
+  toast("Rapport exporte (" + rows.length + " fonctions)", "ok");
+}
+
 function genererRapportTraitementHeure(debut, fin) {
   var dDebut = new Date(debut + "T00:00:00");
   var dFin = new Date(fin + "T23:59:59");
@@ -11186,6 +11359,18 @@ function genererRapportTraitementHeure(debut, fin) {
 function genererRapportProduction(type, debut, fin) {
   if (type === "traitement_heure") {
     genererRapportTraitementHeure(debut, fin);
+    return;
+  }
+  if (type === "aafo_username") {
+    genererRapportAAFOUsername(debut, fin);
+    return;
+  }
+  if (type === "aafo_zone") {
+    genererRapportAAFOZone(debut, fin);
+    return;
+  }
+  if (type === "aafo_fonction") {
+    genererRapportAAFOFonction(debut, fin);
     return;
   }
   const dDebut = new Date(debut + 'T00:00:00');
