@@ -6249,67 +6249,42 @@ async function seConnecter() {
   const code = document.getElementById('inp-code').value;
   const nom  = document.getElementById('inp-nom').value.trim();
   const err  = document.getElementById('login-error');
-  let compte = null;  // FIX: scope global pour acceder au compte apres le if
+  let compte = null;
 
-  if (loginTab === 'agent') {
-    if (!nom) { err.textContent = 'Entrez votre prénom.'; err.style.display = 'block'; return; }
-    // Chercher dans les comptes agents actifs - VERIFIE MATRICULE + CODE
-    const comptes = getComptes ? getComptes() : [];
-    const nomUpper = (nom || '').toUpperCase().trim();
-    compte = comptes.find(c => {
-      if (c.role !== 'agent' || !c.actif || c.code !== code) return false;
-      // Verifier que le matricule/nom/prenom correspond
-      var matU = (c.matricule || '').toUpperCase().trim();
-      var nomU = (c.nom || '').toUpperCase().trim();
-      var prnU = (c.prenom || '').toUpperCase().trim();
-      return matU === nomUpper || nomU === nomUpper || prnU === nomUpper;
-    });
-    if (!compte) { err.textContent = 'Identifiant ou mot de passe incorrect.'; err.style.display = 'block'; return; }
-    // Vérifier si bloqué
-    const bloques = JSON.parse(localStorage.getItem(CLE_BLOQUES || 'mcc_bloques') || '[]');
-    if (bloques.includes(nom)) { err.textContent = 'Ce compte est bloqué. Contactez l\'administrateur.'; err.style.display = 'block'; return; }
-    // ═══ SESSION UNIQUE : la nouvelle connexion remplace l'ancienne ═══
-    // (l'ancienne session se déconnectera automatiquement via le watcher)
-  } else if (loginTab === 'superviseur') {
-    const comptes = getComptes ? getComptes() : [];
-    const nomUpperSup = (nom || '').toUpperCase().trim();
-    compte = comptes.find(c => {
-      if (c.role !== 'superviseur' || !c.actif || c.code !== code) return false;
-      // Si nom est saisi, verifier que ca correspond
-      if (nomUpperSup) {
-        var matU = (c.matricule || '').toUpperCase().trim();
-        var nomU = (c.nom || '').toUpperCase().trim();
-        var prnU = (c.prenom || '').toUpperCase().trim();
-        return matU === nomUpperSup || nomU === nomUpperSup || prnU === nomUpperSup;
-      }
-      return true; // Pour superviseur, le matricule est optionnel
-    });
-    if (!compte) { err.textContent = 'Identifiant ou mot de passe incorrect.'; err.style.display = 'block'; return; }
-  } else {
-    // Admin - VERIFIE MATRICULE + CODE
-    if (!nom) { err.textContent = 'Entrez votre identifiant.'; err.style.display = 'block'; return; }
-    const comptesAdm = getComptes ? getComptes() : [];
-    const nomUpperAdm = (nom || '').toUpperCase().trim();
-    compte = comptesAdm.find(c => {
-      if (c.role !== 'admin' || !c.actif || c.code !== code) return false;
-      var matU = (c.matricule || '').toUpperCase().trim();
-      var nomU = (c.nom || '').toUpperCase().trim();
-      var prnU = (c.prenom || '').toUpperCase().trim();
-      return matU === nomUpperAdm || nomU === nomUpperAdm || prnU === nomUpperAdm;
-    });
-    if (!compte) { err.textContent = 'Identifiant ou mot de passe incorrect.'; err.style.display = 'block'; return; }
-  }
+  if (!nom)  { err.textContent = 'Entrez votre identifiant.'; err.style.display = 'block'; return; }
+  if (!code) { err.textContent = 'Entrez votre mot de passe.'; err.style.display = 'block'; return; }
 
-  // FIX: utiliser le role REEL du compte trouve (pas l'onglet)
-  roleActif = (compte && compte.role) ? compte.role : loginTab;
-  // Securite: bloquer si l'onglet ne correspond pas au role du compte
-  if (compte && compte.role && compte.role !== loginTab) {
-    err.textContent = 'Ce compte n est pas autorise pour cet onglet (compte = ' + compte.role + ').';
+  // ═══ DETECTION AUTO : chercher le compte par matricule + mot de passe ═══
+  const comptes = getComptes ? getComptes() : [];
+  const nomUpper = (nom || '').toUpperCase().trim();
+  compte = comptes.find(cc => {
+    if (!cc.actif || cc.code !== code) return false;
+    var matU = (cc.matricule || '').toUpperCase().trim();
+    var nomU = (cc.nom || '').toUpperCase().trim();
+    var prnU = (cc.prenom || '').toUpperCase().trim();
+    return matU === nomUpper || nomU === nomUpper || prnU === nomUpper;
+  });
+
+  if (!compte) {
+    err.textContent = 'Identifiant ou mot de passe incorrect.';
     err.style.display = 'block';
-    roleActif = null;
     return;
   }
-  agentNom  = loginTab === 'agent' ? nom : loginTab === 'superviseur' ? 'Superviseur' : 'Administrateur';
+
+  // Verifier si bloque (agents seulement)
+  if (compte.role === 'agent') {
+    const bloques = JSON.parse(localStorage.getItem(CLE_BLOQUES || 'mcc_bloques') || '[]');
+    if (bloques.includes(nom)) {
+      err.textContent = 'Ce compte est bloque. Contactez l administrateur.';
+      err.style.display = 'block';
+      return;
+    }
+  }
+
+  // ═══ DETECTION AUTO DU ROLE depuis le compte ═══
+  roleActif = compte.role;
+  loginTab  = compte.role; // synchroniser pour le reste du code
+  agentNom  = compte.role === 'agent' ? nom : compte.role === 'superviseur' ? (compte.prenom || compte.nom_famille || 'Superviseur') : (compte.prenom || compte.nom_famille || 'Administrateur');
 
   // ═══ Démarrer la session unique sur Firebase (heartbeat + watcher) ═══
   // Si une autre session était active pour ce compte, elle sera déconnectée
