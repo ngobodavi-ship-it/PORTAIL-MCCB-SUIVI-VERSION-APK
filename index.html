@@ -6249,13 +6249,14 @@ async function seConnecter() {
   const code = document.getElementById('inp-code').value;
   const nom  = document.getElementById('inp-nom').value.trim();
   const err  = document.getElementById('login-error');
+  let compte = null;  // FIX: scope global pour acceder au compte apres le if
 
   if (loginTab === 'agent') {
     if (!nom) { err.textContent = 'Entrez votre prénom.'; err.style.display = 'block'; return; }
     // Chercher dans les comptes agents actifs - VERIFIE MATRICULE + CODE
     const comptes = getComptes ? getComptes() : [];
     const nomUpper = (nom || '').toUpperCase().trim();
-    const compte = comptes.find(c => {
+    compte = comptes.find(c => {
       if (c.role !== 'agent' || !c.actif || c.code !== code) return false;
       // Verifier que le matricule/nom/prenom correspond
       var matU = (c.matricule || '').toUpperCase().trim();
@@ -6272,7 +6273,7 @@ async function seConnecter() {
   } else if (loginTab === 'superviseur') {
     const comptes = getComptes ? getComptes() : [];
     const nomUpperSup = (nom || '').toUpperCase().trim();
-    const compte = comptes.find(c => {
+    compte = comptes.find(c => {
       if (c.role !== 'superviseur' || !c.actif || c.code !== code) return false;
       // Si nom est saisi, verifier que ca correspond
       if (nomUpperSup) {
@@ -6290,12 +6291,12 @@ async function seConnecter() {
   }
 
   // FIX: utiliser le role REEL du compte trouve (pas l'onglet)
-  roleActif = (typeof compte !== 'undefined' && compte && compte.role) ? compte.role : loginTab;
+  roleActif = (compte && compte.role) ? compte.role : loginTab;
   // Securite: bloquer si l'onglet ne correspond pas au role du compte
-  if (typeof compte !== 'undefined' && compte && compte.role && compte.role !== loginTab) {
+  if (compte && compte.role && compte.role !== loginTab) {
     err.textContent = 'Ce compte n est pas autorise pour cet onglet (compte = ' + compte.role + ').';
     err.style.display = 'block';
-  roleActif = null;
+    roleActif = null;
     return;
   }
   agentNom  = loginTab === 'agent' ? nom : loginTab === 'superviseur' ? 'Superviseur' : 'Administrateur';
