@@ -5871,14 +5871,23 @@ function fbInitListeners() {
     if (vGSMSup && vGSMSup.style.display!=='none' && typeof chargerGSMSup==='function') chargerGSMSup();
   });
 
-  // Messages → agents
+  // Messages → agents (FIX : afficher la notification ET le badge)
   fbOnValue('messages', snap => {
     const val = snap.val();
     const msgs = val ? Object.values(val).sort((a,b)=>(b.id||0)-(a.id||0)).slice(0,50) : [];
     try { localStorage.setItem(CLE_MSG, JSON.stringify(msgs)); } catch(e){}
     if (msgs.length && typeof msgDernierLu!=='undefined') {
       const dernierMsg = msgs[0];
-      if (dernierMsg && dernierMsg.id > msgDernierLu && typeof afficherBadgeMsg==='function') afficherBadgeMsg(msgs);
+      if (dernierMsg && dernierMsg.id > msgDernierLu) {
+        msgDernierLu = dernierMsg.id;
+        try { localStorage.setItem('mcc_msg_lu', dernierMsg.id); } catch(e){}
+        // Afficher la NOTIFICATION visible en bas a droite
+        if (typeof afficherNotifMessage === 'function' && (typeof roleActif==='undefined' || roleActif === 'agent')) {
+          afficherNotifMessage(dernierMsg);
+        }
+        // Afficher aussi le badge sur le bouton Message
+        if (typeof afficherBadgeMsg === 'function') afficherBadgeMsg(msgs);
+      }
     }
   });
 
