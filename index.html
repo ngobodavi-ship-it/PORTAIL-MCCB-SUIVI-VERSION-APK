@@ -22645,7 +22645,7 @@ function demanderAide() {
   
   function ecouter() {
     if (typeof fbOnValue !== 'function') return;
-    if (typeof roleActif === 'undefined' || (roleActif !== 'sup' && roleActif !== 'admin')) return;
+    if (typeof roleActif === 'undefined' || (roleActif !== 'sup' && roleActif !== 'superviseur' && roleActif !== 'admin')) return;
     if (window._aideEcouteActive) return;
     window._aideEcouteActive = true;
     
