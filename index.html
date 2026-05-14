@@ -17498,6 +17498,34 @@ async function soumettre() {
     var id = 'D' + Date.now();
     var liste = JSON.parse(localStorage.getItem(CLE_DOSSIERS) || '[]');
 
+    // ═══ BLOCAGE DOUBLON : verifier qu aucun des numeros n a deja ete soumis le meme jour ═══
+    // (sauf si rejete : on autorise resoumission apres rejet)
+    var doublons = [];
+    for (var ni = 0; ni < numeros.length; ni++) {
+      var numTest = numeros[ni];
+      for (var li = 0; li < liste.length; li++) {
+        var dExist = liste[li];
+        if (!dExist || dExist.date !== date) continue;
+        if (dExist.statut === 'rejete') continue; // rejete = on peut resoumettre
+        var numsExist = dExist.numeros_all || [dExist.numero_mtn];
+        if (numsExist.indexOf(numTest) !== -1) {
+          var statutLabel = dExist.statut === 'en_attente' ? 'en attente'
+                         : dExist.statut === 'en_cours' ? 'en cours de traitement'
+                         : dExist.statut === 'accepte' ? 'deja accepte'
+                         : dExist.statut;
+          doublons.push(numTest + ' (' + statutLabel + ')');
+          break;
+        }
+      }
+    }
+    if (doublons.length > 0) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('formulaire').style.display = 'block';
+      alert('⛔ DOUBLON DETECTE\n\nLe(s) numero(s) suivant(s) ont deja ete soumis aujourd hui :\n\n  - ' + doublons.join('\n  - ') + '\n\nVous ne pouvez pas resoumettre un numero deja en attente, en cours ou accepte le meme jour.\n\nSeuls les numeros rejetes peuvent etre resoumis.');
+      return;
+    }
+
+
     // UN SEUL dossier avec tous les numéros
     var dossier = {
       id:              id,
