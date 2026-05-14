@@ -23231,6 +23231,37 @@ setInterval(function(){
 
 setTimeout(chargerTop10Rejets, 1200);
 </script>
+<script id="js-import-agents-mass">
+(function() {
+  if (localStorage.getItem("mcc_agents_imports_v1")) return;
+  function importerAgents() {
+    if (typeof CLE_COMPTES === "undefined") { setTimeout(importerAgents, 1500); return; }
+    var AGENTS = [
+      ["LABORO","ABORO","Loemba Messie",2017],["LAIDOU","AIDOU","Lyla",2018],["MAMELE","AMELE","Miere Dieu-veille",2019],["EAPIANA","APIANA","Emmanuel Juvenu",2020],["AASSIME","ASSIME","Akie Emmanuel Manou",2021],["BAYESSA","AYESSA","Benoite Esther Benie",2022],["LBATEKOUAHOU2","BATEKOUAHOU","Liaslias Fortine",2023],["LBATEKOUAHOU","BATEKOUAHOU","Liaslias Fortunee",2024],["TBENDO","BENDO","Tchick Sethi Ceciliat",2025],["RBILAYI","BILAYI","Reine",2026],["RBODZOLO","BODZOLO","Ronai Dache",2027],["RBONGO","BONGO","Richi",2028],["MEKOBA","EKOBA","Mbila Debora Henrieta",2029],["BELABE","ELABE","Blandine",2030],["AELENGA","ELENGA","Angonga Rodelain Roi",2031],["PEPIELE","EPIELE","Paul",2032],["JGANKI","GANKI","Jairus",2033],["OGATSONGO","GATSONGO","Otta Roy Japhet",2034],["CGOMA","GOMA","Chekinah Oceane Iris",2035],["JIBALA","IBALA","Josue",2036],["JIBALA2","IBALA","Josue Amour Gloire",2037],["EIBONGO","IBONGO","Ewowo Fiarce Beni",2038],["OILOY","ILOY","Oceane Genesia",2039],["SILOY","ILOY","Syliana Tendresse Aimeransie",2040],["BKEDOU","KEDOU","Bitala Messmer Gedeon",2041],["DKISSITA","KISSITA","Dieuveille",2042],["GLEVANT","LEVANT","Gloria Raysteeve",2043],["BMABIALA","MABIALA","Belande",2044],["PMADIOSSO","MADIOSSO","Princille",2045],["DMADZABA","MADZABA","Del",2046],["NMAFOULA","MAFOULA","Ngatsou Ridela",2047],["RMAFOULA","MAFOULA","Ridela",2048],["BMAHOUA","MAHOUA","Biyekele Ardaiche Vrailvi",2049],["BMAHOUNGOU","MAHOUNGOU","Balossa Kisito Christian Yann",2050],["NMAKAYA","MAKAYA","Nick Dina",2051],["BMANGOUANI","MANGOUANI","Barnes Prodige",2052],["CMASSALA","MASSALA","Charmant",2053],["GMASSAMBA","MASSAMBA","Gloire",2054],["KMASSOUNGA","MASSOUNGA","Kouyate Parfait Lye",2055],["MMATONDO","MATONDO","Michelle Danielle",2056],["OMBAMA","MBAMA","Odou Ghislain Richelle",2057],["DMBATANI","MBATANI","Destin",2058],["RMBONGO","MBONGO","Russel",2059],["AMBOUMBA","MBOUMBA","Aka Laureate Benedicte",2060],["BMIYEKET","MIYEKET","Bland Nesnador",2061],["MMOUANGA","MOUANGA","Matsimouna Algevie Estella",2062],["PMOUANGA","MOUANGA","Prince Arisca Naick",2063],["PMOUANGA2","MOUANGA","Prince Arisca Naick",2064],["MMOUNGALLA","MOUNGALLA","Melissa",2065],["VMPASSI","MPASSI","Victorine",2066],["ANDONGO","NDONGO","Arnauld Christ",2067],["ENGAKONO","NGAKONO","Elvina",2068],["INGAKONO","NGAKONO","Idriss",2069],["BNGANDZEMIAKONDZO","NGANDZEMI-AKONDZO","Bijou Chrishna",2070],["LNGWANGA","NGWANGA","Lemoi Justine",2071],["ENIANGA","NIANGA","Ekamba Thierno Deina",2072],["ENOM","NOM","Et Prenom",2073],["CNZALABAKA","NZALABAKA","Cardorelle C",2074],["TOKANA","OKANA","Tendresse Sullivane",2075],["COKANDZE","OKANDZE","Clara Ghismine",2076],["JOKOMBI","OKOMBI","Juskard",2077],["AOKOUMA","OKOUMA","Akambi Genial",2078],["NOLIEN","OLIEN","Ngalou Helena",2079],["CONGOUYA","ONGOUYA","Chancellia",2080],["PPOATY","POATY","Prince Chalanda",2081],["FSUR","SOEUR","Femina Piermarie",2082],["RSOUEKOLO","SOUEKOLO","Regne Sahira Dynicha",2083],["RSOUEKOLO2","SOUEKOLO","Regne Sahura Dynicha",2084],["JSYLOUVANGUI","SYLOUVANGUI","Junior",2085],["RTHIME","THIME","Roddy Marcellus",2086],["ITSALISSAN","TSALISSAN","Ibakou Nee Mayembe Grace",2087],["FVARIN","VARIN","Florian",2088],["GYOMBI","YOMBI","Genere",2089]
+    ];
+    var comptes = [];
+    try { comptes = JSON.parse(localStorage.getItem(CLE_COMPTES) || "[]"); } catch(e){}
+    var existants = {};
+    comptes.forEach(function(c){ if(c.matricule) existants[c.matricule.toUpperCase()] = true; });
+    var crees = 0;
+    AGENTS.forEach(function(a){
+      var matricule = a[0], nom = a[1], prenom = a[2], annee = a[3];
+      if (existants[matricule.toUpperCase()]) return;
+      var compte = { id: "agent_" + matricule + "_" + Date.now() + "_" + Math.floor(Math.random()*1000), role: "agent", nom: matricule, nom_famille: nom, prenom: prenom, matricule: matricule, email: "", code: "Media-" + annee, actif: true, cree_le: Date.now() };
+      comptes.push(compte);
+      crees++;
+      if (typeof fbSet === "function") { try { fbSet("comptes/" + compte.id, compte); } catch(e){} }
+    });
+    if (crees > 0) {
+      try { localStorage.setItem(CLE_COMPTES, JSON.stringify(comptes)); } catch(e){}
+      console.log("[IMPORT AGENTS] " + crees + " agents crees");
+      if (typeof toast === "function") toast("Import : " + crees + " agents crees", "ok");
+    }
+    localStorage.setItem("mcc_agents_imports_v1", String(Date.now()));
+  }
+  setTimeout(importerAgents, 2000);
+})();
+</script>
 </body>
 </html>
 
