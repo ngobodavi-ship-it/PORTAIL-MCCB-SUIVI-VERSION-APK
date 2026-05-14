@@ -17035,6 +17035,20 @@ setInterval(() => {
 
 /* Override seDeconnecter → retour portail */
 seDeconnecter = function() {
+  if (typeof roleActif !== 'undefined' && roleActif === 'agent' && agentNom && typeof dossiers === 'object') {
+    var dossiersEnCours = [];
+    for (var k in dossiers) {
+      var d = dossiers[k];
+      if (d && d.statut === 'en_cours' && d.agent_saisie === agentNom) {
+        dossiersEnCours.push(d);
+      }
+    }
+    if (dossiersEnCours.length > 0) {
+      var liste = dossiersEnCours.map(function(d) { return '\n  - ' + (d.numero_mtn || d.id); }).join('');
+      alert('DECONNEXION IMPOSSIBLE\n\nVous avez ' + dossiersEnCours.length + ' dossier(s) en cours :' + liste + '\n\nVeuillez ACCEPTER ou REJETER chaque dossier avant de vous deconnecter.\n\nLe transfert n est pas autorise.');
+      return;
+    }
+  }
   if (typeof roleActif !== 'undefined' && roleActif === 'agent') supprimerPresence();
   roleActif = null; agentNom = '';
   ['agent','sup','hist','gsm','gsm-sup','admin','perf'].forEach(function(v){
