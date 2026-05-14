@@ -23286,6 +23286,41 @@ setTimeout(chargerTop10Rejets, 1200);
   setTimeout(importerAgents, 2000);
 })();
 </script>
+
+<script id="js-reparer-comptes">
+window.reparerComptesImportes = function() {
+  if (!confirm("Cette action va SUPPRIMER tous les comptes importes automatiquement (id commencant par agent_) et les RECREER proprement avec role=agent. Continuer ?")) return;
+  
+  // 1. Charger les comptes actuels
+  var comptes = [];
+  try { comptes = JSON.parse(localStorage.getItem(CLE_COMPTES) || "[]"); } catch(e){}
+  
+  // 2. Identifier et supprimer les comptes importes
+  var aSupprimer = comptes.filter(function(c){
+    return c.id && c.id.indexOf("agent_") === 0;
+  });
+  console.log("Comptes a supprimer:", aSupprimer.length);
+  aSupprimer.forEach(function(c){
+    console.log("  - ID:", c.id, "| role:", c.role, "| matricule:", c.matricule);
+    // Supprimer de Firebase
+    if (typeof fbSet === "function") {
+      try { fbSet("comptes/" + c.id, null); } catch(e){}
+    }
+  });
+  
+  // 3. Garder seulement les comptes non-importes
+  var comptesPropres = comptes.filter(function(c){
+    return !c.id || c.id.indexOf("agent_") !== 0;
+  });
+  localStorage.setItem(CLE_COMPTES, JSON.stringify(comptesPropres));
+  
+  // 4. Reset le marqueur pour relancer l import
+  localStorage.removeItem("mcc_agents_imports_v1");
+  
+  alert("Nettoyage termine !\n\nSupprimes: " + aSupprimer.length + "\nRestants: " + comptesPropres.length + "\n\nRafraichis la page (F5) pour reimporter proprement.");
+};
+console.log("[REPARATION] Pour lancer la reparation, tape: reparerComptesImportes()");
+</script>
 </body>
 </html>
 
