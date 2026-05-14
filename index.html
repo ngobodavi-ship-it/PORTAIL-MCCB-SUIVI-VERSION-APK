@@ -6289,7 +6289,15 @@ async function seConnecter() {
     if (code !== CODES.admin) { err.textContent = 'Code incorrect.'; err.style.display = 'block'; return; }
   }
 
-  roleActif = loginTab;
+  // FIX: utiliser le role REEL du compte trouve (pas l'onglet)
+  roleActif = (typeof compte !== 'undefined' && compte && compte.role) ? compte.role : loginTab;
+  // Securite: bloquer si l'onglet ne correspond pas au role du compte
+  if (typeof compte !== 'undefined' && compte && compte.role && compte.role !== loginTab) {
+    err.textContent = 'Ce compte n est pas autorise pour cet onglet (compte = ' + compte.role + ').';
+    err.style.display = 'block';
+  roleActif = null;
+    return;
+  }
   agentNom  = loginTab === 'agent' ? nom : loginTab === 'superviseur' ? 'Superviseur' : 'Administrateur';
 
   // ═══ Démarrer la session unique sur Firebase (heartbeat + watcher) ═══
