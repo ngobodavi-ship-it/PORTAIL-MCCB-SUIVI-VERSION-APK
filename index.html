@@ -22714,6 +22714,15 @@ function demanderAide() {
 (function() {
   var dejaVues = new Set();
   
+  // Charger les demandes deja vues depuis localStorage (persiste apres F5)
+  function chargerDejaVues() {
+    try {
+      var arr = JSON.parse(localStorage.getItem('mcc_aide_vues') || '[]');
+      arr.forEach(function(id){ dejaVues.add(id); });
+    } catch(e){}
+  }
+  chargerDejaVues();
+
   function ecouter() {
     if (typeof fbOnValue !== 'function') return;
     if (typeof roleActif === 'undefined' || (roleActif !== 'sup' && roleActif !== 'superviseur' && roleActif !== 'admin')) return;
@@ -22728,6 +22737,16 @@ function demanderAide() {
         var d = all[id];
         if (!d) return;
         dejaVues.add(id);
+        // Sauvegarder dans localStorage pour persistance
+        try {
+          var arr = JSON.parse(localStorage.getItem('mcc_aide_vues') || '[]');
+          if (arr.indexOf(id) === -1) {
+            arr.push(id);
+            // Garder seulement les 200 dernieres pour ne pas saturer
+            if (arr.length > 200) arr = arr.slice(-200);
+            localStorage.setItem('mcc_aide_vues', JSON.stringify(arr));
+          }
+        } catch(e){}
         // Reutiliser la popup de notification existante !
         if (typeof afficherNotifMessage === 'function') {
           afficherNotifMessage(d);
