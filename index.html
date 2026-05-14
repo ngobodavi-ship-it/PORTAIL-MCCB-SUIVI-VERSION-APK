@@ -16905,10 +16905,8 @@ function togglePause() {
       d.statut === 'en_cours' && d.agent_saisie === agentNom
     );
     if (dossiersEnCours.length > 0) {
-      var msg = dossiersEnCours.length === 1
-        ? '⛔ Terminez votre dossier en cours avant de prendre une pause !'
-        : '⛔ Terminez vos ' + dossiersEnCours.length + ' dossiers en cours avant de prendre une pause !';
-      toast(msg, 'er');
+      var liste = dossiersEnCours.map(function(d) { return '\n  - ' + (d.numero_mtn || d.id); }).join('');
+      alert('PAUSE IMPOSSIBLE\n\nVous avez ' + dossiersEnCours.length + ' dossier(s) en cours :' + liste + '\n\nVeuillez ACCEPTER ou REJETER chaque dossier avant de prendre une pause.\n\nLe transfert n est pas autorise.');
       return;
     }
   }
