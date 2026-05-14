@@ -22599,83 +22599,74 @@ function toggleRetardBloc() {
 })();
 </script>
 <style id="css-actif-final">.bloc-dossier-actif{position:relative;border:3px solid #10b981 !important;background:#dcfce7 !important;box-shadow:0 4px 14px rgba(16,185,129,0.4) !important;border-radius:12px !important}.bloc-dossier-actif button[onclick^="ouvrir("]{background:#10b981 !important;color:#fff !important}.bloc-dossier-actif::before{content:"ACTIF";position:absolute;top:-12px;right:14px;background:#10b981;color:#fff;padding:4px 12px;border-radius:12px;font-size:11px;font-weight:800;z-index:100}</style><script id="js-actif-final">(function(){function marquer(){document.querySelectorAll(".bloc-dossier-actif").forEach(function(e){e.classList.remove("bloc-dossier-actif")});if(typeof actifId==="undefined"||!actifId)return;var b=document.querySelectorAll("button[onclick]");b.forEach(function(x){var o=x.getAttribute("onclick")||"";if(o.indexOf("ouvrir('"+actifId+"')")!==-1){var c=x.closest("div");if(c&&c.children.length<2)c=c.parentElement;if(c&&c.children.length<3){var p=c.parentElement;if(p&&p.tagName==="DIV")c=p}if(c)c.classList.add("bloc-dossier-actif")}})}setInterval(marquer,500);if(document.readyState!=="loading"){marquer()}else{document.addEventListener("DOMContentLoaded",marquer)}})();</script><div id="modal-blocage" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.65);z-index:99999;align-items:center;justify-content:center"><div style="background:#fff;border-radius:18px;padding:32px;max-width:480px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.4);text-align:center;border-top:6px solid #dc2626"><div style="font-size:64px;line-height:1;margin-bottom:8px">STOP</div><h2 id="modal-blocage-titre" style="color:#dc2626;font-size:22px;font-weight:900;margin:0 0 18px 0">BLOCAGE</h2><div id="modal-blocage-message" style="color:#374151;font-size:14px;line-height:1.6;margin-bottom:14px"></div><div id="modal-blocage-liste" style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px;margin:14px 0;text-align:left;font-size:13px;color:#991b1b;font-weight:700;max-height:200px;overflow-y:auto"></div><div style="color:#6b7280;font-size:12px;font-style:italic;margin-bottom:20px">Le transfert n est pas autorise. Veuillez ACCEPTER ou REJETER chaque dossier.</div><button onclick="document.getElementById('modal-blocage').style.display='none'" style="padding:12px 38px;background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;letter-spacing:0.5px;box-shadow:0 4px 14px rgba(220,38,38,0.4)">OK, je comprends</button></div></div><script id="js-modal-blocage">window.afficherBlocage=function(titre,dossiers,action){var m=document.getElementById("modal-blocage");if(!m)return;document.getElementById("modal-blocage-titre").textContent=titre;document.getElementById("modal-blocage-message").innerHTML="Vous avez <strong style=\"color:#dc2626;font-size:18px\">"+dossiers.length+"</strong> dossier(s) en cours qui doivent etre traite(s) avant de "+action+" :";var h=dossiers.map(function(d){return "<div style=\"padding:4px 0;border-bottom:1px solid #fee2e2\"><span style=\"color:#dc2626\">></span> Dossier <strong>"+(d.numero_mtn||d.id)+"</strong></div>"}).join("");document.getElementById("modal-blocage-liste").innerHTML=h;m.style.display="flex"};</script>
-<script id="js-demande-aide">
-// AGENT : envoyer une demande d'aide
+
+
+<script id="js-demande-aide-v2">
+// AGENT : envoyer une demande d aide via le systeme de messages existant
 function demanderAide() {
   if (typeof roleActif === 'undefined' || roleActif !== 'agent') {
     return;
   }
-  if (!confirm("Demander de l aide au superviseur ?\n\nIl recevra une alerte immediatement.")) {
+  if (!confirm("Demander de l aide au superviseur ?\n\nLe superviseur recevra une notification immediatement.")) {
     return;
   }
-  var alerte = {
+  
+  var nomAgent = typeof agentNom !== 'undefined' ? agentNom : 'Agent';
+  var dossierInfo = '';
+  if (typeof actifId !== 'undefined' && actifId && typeof dossiers !== 'undefined' && dossiers[actifId]) {
+    dossierInfo = ' (Dossier : ' + (dossiers[actifId].numero_mtn || actifId) + ')';
+  }
+  
+  var msg = {
     id: Date.now(),
-    agent: typeof agentNom !== 'undefined' ? agentNom : 'Inconnu',
+    texte: nomAgent + ' a besoin d AIDE URGENT SVP' + dossierInfo,
+    type: 'urgent',
     heure: new Date().toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'}),
     date: new Date().toLocaleDateString('fr-FR'),
-    dossier: typeof actifId !== 'undefined' && actifId && typeof dossiers !== 'undefined' && dossiers[actifId] ? (dossiers[actifId].numero_mtn || actifId) : null,
-    statut: 'en_attente'
+    from: 'agent_aide',
+    agent: nomAgent
   };
-  // Envoyer via Firebase
+  
+  // Envoyer via Firebase dans /demandes_aide (separe des messages superviseur)
   if (typeof fbSet === 'function') {
-    fbSet('demandes_aide/' + alerte.id, alerte).then(function() {
-      if (typeof toast === 'function') toast('Demande d aide envoyee au superviseur', 'ok');
+    fbSet('demandes_aide/' + msg.id, msg).then(function() {
+      if (typeof toast === 'function') toast('Demande d aide envoyee', 'ok');
     }).catch(function() {
-      alert('Erreur d envoi. Reessayez.');
+      alert('Erreur. Reessayez.');
     });
   } else {
-    alert('Service indisponible. Reessayez plus tard.');
+    alert('Service indisponible.');
   }
 }
 
-// SUPERVISEUR : ecouter les demandes d'aide
+// SUPERVISEUR : ecouter les demandes d aide et les afficher avec la meme popup que les messages
 (function() {
-  function ecouterDemandesAide() {
-    if (typeof fbOnValue !== 'function' || typeof roleActif === 'undefined' || roleActif !== 'sup') return;
+  var dejaVues = new Set();
+  
+  function ecouter() {
+    if (typeof fbOnValue !== 'function') return;
+    if (typeof roleActif === 'undefined' || (roleActif !== 'sup' && roleActif !== 'admin')) return;
+    if (window._aideEcouteActive) return;
+    window._aideEcouteActive = true;
+    
     fbOnValue('demandes_aide', function(snap) {
       if (!snap || !snap.exists()) return;
-      var demandes = snap.val();
-      Object.keys(demandes).forEach(function(id) {
-        var d = demandes[id];
-        if (d.statut === 'en_attente') {
-          afficherAlerteAide(d);
+      var all = snap.val();
+      Object.keys(all).forEach(function(id) {
+        if (dejaVues.has(id)) return;
+        var d = all[id];
+        if (!d) return;
+        dejaVues.add(id);
+        // Reutiliser la popup de notification existante !
+        if (typeof afficherNotifMessage === 'function') {
+          afficherNotifMessage(d);
         }
       });
     });
   }
   
-  window.afficherAlerteAide = function(d) {
-    // Eviter de re-afficher la meme alerte
-    if (document.getElementById('alerte-aide-' + d.id)) return;
-    
-    var div = document.createElement('div');
-    div.id = 'alerte-aide-' + d.id;
-    div.style.cssText = 'position:fixed;top:80px;right:20px;z-index:99999;background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;padding:18px 22px;border-radius:14px;box-shadow:0 10px 40px rgba(220,38,38,0.5);max-width:380px;animation:slideInRight .4s ease;border:2px solid #fff;margin-bottom:10px';
-    
-    var dossierInfo = d.dossier ? '<div style="margin-top:6px;font-size:12px;opacity:0.9">📋 Dossier : <strong>' + d.dossier + '</strong></div>' : '';
-    
-    div.innerHTML = '<div style="display:flex;align-items:start;gap:12px"><div style="font-size:32px;line-height:1">🆘</div><div style="flex:1"><div style="font-size:11px;font-weight:700;opacity:0.85;text-transform:uppercase;letter-spacing:0.5px">DEMANDE D AIDE</div><div style="font-size:15px;font-weight:800;margin-top:3px">' + d.agent + '</div><div style="font-size:11px;opacity:0.85;margin-top:2px">' + d.heure + ' - ' + d.date + '</div>' + dossierInfo + '<button onclick="prendreEnCharge(\'' + d.id + '\')" style="margin-top:12px;padding:8px 16px;background:#fff;color:#dc2626;border:none;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;width:100%">✓ Pris en charge</button></div></div>';
-    
-    document.body.appendChild(div);
-    
-    // Son d'alerte (3 bips)
-    if (typeof bip === 'function') {
-      bip(880, .2);
-      setTimeout(function(){bip(880,.2);}, 300);
-      setTimeout(function(){bip(1100,.4);}, 600);
-    }
-  };
-  
-  window.prendreEnCharge = function(id) {
-    if (typeof fbUpdate === 'function') {
-      fbUpdate('demandes_aide/' + id, {statut: 'pris_en_charge', pris_par: typeof agentNom !== 'undefined' ? agentNom : 'Superviseur'});
-    }
-    var el = document.getElementById('alerte-aide-' + id);
-    if (el) el.remove();
-  };
-  
-  // Lancer regulierement pour activer l'ecoute quand le superviseur se connecte
-  setInterval(ecouterDemandesAide, 3000);
+  // Tenter d activer l ecoute regulierement
+  setInterval(ecouter, 2000);
 })();
 </script>
 </body>
