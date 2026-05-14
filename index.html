@@ -1097,8 +1097,8 @@ canvas{max-height:200px}
 .btn-msg-send.urgent{background:var(--r)}
 .btn-msg-cancel{padding:9px 16px;border:1px solid var(--bd);border-radius:8px;background:#fff;font-size:13px;cursor:pointer;color:var(--muted)}
 /* Notification agent */
-#notif-msg{position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:900;width:92%;max-width:500px;display:none;animation:dropIn .4s ease}
-@keyframes dropIn{from{transform:translateX(-50%) translateY(-20px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+#notif-msg{position:fixed;bottom:20px;right:20px;z-index:99999;width:340px;max-width:90vw;display:none;animation:slideInRight .4s ease}
+@keyframes slideInRight { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } } @keyframes dropIn{from{transform:translateX(-50%) translateY(-20px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
 .notif-msg-box{border-radius:12px;padding:14px 18px;display:flex;align-items:flex-start;gap:12px;box-shadow:0 8px 30px rgba(0,0,0,.2)}
 .notif-msg-box.normal{background:#1A1A1A;border-left:5px solid var(--o)}
 .notif-msg-box.urgent{background:#dc2626;animation:urgentPulse 1s infinite}
@@ -11569,8 +11569,7 @@ function afficherNotifMessage(msg) {
   } else {
     bip(660, .2);
   }
-  // Auto-fermer après 8s pour message normal
-  if (msg.type === 'normal') setTimeout(fermerNotifMsg, 8000);
+  // L'agent ferme lui-meme avec la croix (pas d'auto-fermeture)
 }
 
 function fermerNotifMsg() {
