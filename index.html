@@ -3562,7 +3562,21 @@ label:has(#mod-ecoute) {
           <button onclick="exporterReporting('heures_agents')" style="width:100%;padding:10px;border:none;border-radius:8px;background:#dc2626;color:#fff;font-size:12px;font-weight:700;cursor:pointer">⬇ Heures agents (.xlsx)</button>
         </div>
 
-        <!-- Rapport rejets/acceptations par agent -->
+        <!-- Rapport traitement par heure -->
+        <div class="card" style="border:1.5px solid #bfdbfe;background:#eff6ff">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+            <div style="width:38px;height:38px;border-radius:10px;background:#2563eb;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">⏰</div>
+            <div>
+              <div style="font-size:13px;font-weight:800;color:#1e3a8a">Traitement par heure</div>
+              <div style="font-size:10px;color:#6b7280">Dossiers traités par date et heure</div>
+            </div>
+          </div>
+          <div style="font-size:11px;color:#6b7280;margin-bottom:12px;line-height:1.6">
+            Nombre de dossiers reçus, acceptés, rejetés et en cours pour chaque heure de chaque jour de la période.
+          </div>
+          <button onclick="exporterReporting('traitement_heure')" style="width:100%;padding:10px;border:none;border-radius:8px;background:#2563eb;color:#fff;font-size:12px;font-weight:700;cursor:pointer">⬇ Traitement par heure (.xlsx)</button>
+        </div>
+
         <div class="card" style="border:1.5px solid #d1fae5;background:#f0fdf4">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
             <div style="width:38px;height:38px;border-radius:10px;background:#059669;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">✅</div>
@@ -10948,7 +10962,7 @@ function exporterReporting(quoi) {
   if (debut > fin)    { toast('⚠ La date de début doit être avant la date de fin.', 'er'); return; }
 
   // Rapports de production — traitement direct
-  if (['prod_agent','prod_global','heures_agents','rejets_acceptations'].includes(quoi)) {
+  if (['prod_agent','prod_global','heures_agents','rejets_acceptations','traitement_heure'].includes(quoi)) {
     genererRapportProduction(quoi, debut, fin);
     return;
   }
@@ -11099,7 +11113,55 @@ function exporterPeriodeAvecDates(quoi, debut, fin) {
 }
 
 // ── Générateur des rapports de production ─────────────────────
+function genererRapportTraitementHeure(debut, fin) {
+  var dDebut = new Date(debut + "T00:00:00");
+  var dFin = new Date(fin + "T23:59:59");
+  var tousDossiers = JSON.parse(localStorage.getItem(CLE_DOSSIERS) || "[]");
+  var dossiersFiltres = tousDossiers.filter(function(d){
+    if (d.created_at === undefined || d.created_at === null) return false;
+    var dt = new Date(d.created_at * 1000);
+    return dt >= dDebut && dt <= dFin;
+  });
+  if (dossiersFiltres.length === 0) {
+    toast("Aucun dossier dans la periode selectionnee", "er");
+    return;
+  }
+  var parDateHeure = {};
+  dossiersFiltres.forEach(function(d){
+    var dt = new Date(d.created_at * 1000);
+    var date = dt.toISOString().slice(0,10);
+    var heure = String(dt.getHours()).padStart(2,"0") + "h";
+    var key = date + "|" + heure;
+    if (parDateHeure[key] === undefined) parDateHeure[key] = { date: date, heure: heure, recus: 0, acceptes: 0, rejetes: 0, en_cours: 0, en_attente: 0 };
+    parDateHeure[key].recus++;
+    if (d.statut === "accepte") parDateHeure[key].acceptes++;
+    else if (d.statut === "rejete") parDateHeure[key].rejetes++;
+    else if (d.statut === "en_cours") parDateHeure[key].en_cours++;
+    else if (d.statut === "en_attente") parDateHeure[key].en_attente++;
+  });
+  var rows = Object.values(parDateHeure).sort(function(a,b){
+    if (a.date !== b.date) return a.date.localeCompare(b.date);
+    return a.heure.localeCompare(b.heure);
+  });
+  var wb = XLSX.utils.book_new();
+  var data = [["Date","Heure","Recus","Acceptes","Rejetes","En cours","En attente","Taux acceptation"]];
+  rows.forEach(function(r){
+    var traites = r.acceptes + r.rejetes;
+    var taux = traites > 0 ? Math.round(r.acceptes/traites*100) + "%" : "-";
+    data.push([r.date, r.heure, r.recus, r.acceptes, r.rejetes, r.en_cours, r.en_attente, taux]);
+  });
+  var ws = XLSX.utils.aoa_to_sheet(data);
+  ws["!cols"] = [{wch:12},{wch:8},{wch:8},{wch:10},{wch:8},{wch:9},{wch:11},{wch:14}];
+  XLSX.utils.book_append_sheet(wb, ws, "Traitement par heure");
+  XLSX.writeFile(wb, "traitement_par_heure_" + debut + "_au_" + fin + ".xlsx");
+  toast("Rapport exporte (" + rows.length + " lignes)", "ok");
+}
+
 function genererRapportProduction(type, debut, fin) {
+  if (type === "traitement_heure") {
+    genererRapportTraitementHeure(debut, fin);
+    return;
+  }
   const dDebut = new Date(debut + 'T00:00:00');
   const dFin   = new Date(fin   + 'T23:59:59');
 
