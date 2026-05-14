@@ -3413,6 +3413,7 @@ label:has(#mod-ecoute) {
     </div>
     <div class="card">
       <h3>Performance par agent</h3>
+      <div style="margin-bottom:10px"><input type="text" id="perf-agent-recherche" oninput="filtrerPerfAgents()" placeholder="Rechercher un agent..." style="width:100%;padding:9px 12px;border:1.5px solid var(--bd);border-radius:8px;font-size:13px;outline:none;background:#fff"></div>
       <table class="sup-table">
         <thead><tr><th>Agent</th><th>Total</th><th>Acceptés</th><th>Rejetés</th><th>Taux</th></tr></thead>
         <tbody id="tbl-agents"></tbody>
@@ -22672,7 +22673,7 @@ function demanderAide() {
   setInterval(ecouter, 2000);
 })();
 </script>
-<script id="js-show-btn-aide">(function(){function surv(){var b=document.getElementById("btn-aide");if(!b)return;if(typeof roleActif!=="undefined"&&roleActif==="agent"){b.style.display="flex"}else{b.style.display="none"}}setInterval(surv,500);if(document.readyState!=="loading"){surv()}else{document.addEventListener("DOMContentLoaded",surv)}})();</script><script id="js-filtrer-transfert">function filtrerListeTransfert(){var i=document.getElementById("sup-transfert-recherche");if(!i)return;var q=i.value.trim().toLowerCase();var l=document.getElementById("sup-transfert-liste");if(!l)return;var items=l.children;for(var k=0;k<items.length;k++){var txt=items[k].textContent.toLowerCase();items[k].style.display=(!q||txt.indexOf(q)!==-1)?"":"none"}}</script></body>
+<script id="js-show-btn-aide">(function(){function surv(){var b=document.getElementById("btn-aide");if(!b)return;if(typeof roleActif!=="undefined"&&roleActif==="agent"){b.style.display="flex"}else{b.style.display="none"}}setInterval(surv,500);if(document.readyState!=="loading"){surv()}else{document.addEventListener("DOMContentLoaded",surv)}})();</script><script id="js-filtrer-transfert">function filtrerListeTransfert(){var i=document.getElementById("sup-transfert-recherche");if(!i)return;var q=i.value.trim().toLowerCase();var l=document.getElementById("sup-transfert-liste");if(!l)return;var items=l.children;for(var k=0;k<items.length;k++){var txt=items[k].textContent.toLowerCase();items[k].style.display=(!q||txt.indexOf(q)!==-1)?"":"none"}}</script><script id="js-filtrer-perf-agent">function filtrerPerfAgents(){var i=document.getElementById("perf-agent-recherche");if(!i)return;var q=i.value.trim().toLowerCase();var t=document.getElementById("tbl-agents");if(!t)return;var rows=t.querySelectorAll("tr");for(var k=0;k<rows.length;k++){var txt=rows[k].textContent.toLowerCase();rows[k].style.display=(!q||txt.indexOf(q)!==-1)?"":"none"}}</script></body>
 </html>
 
 <script>
