@@ -6252,12 +6252,18 @@ async function seConnecter() {
 
   if (loginTab === 'agent') {
     if (!nom) { err.textContent = 'Entrez votre prénom.'; err.style.display = 'block'; return; }
-    // Chercher dans les comptes agents actifs
+    // Chercher dans les comptes agents actifs - VERIFIE MATRICULE + CODE
     const comptes = getComptes ? getComptes() : [];
-    const compte = comptes.find(c => c.role === 'agent' && c.actif && c.code === code);
-    // Fallback sur code générique si pas de comptes créés
-    const codeOk = compte || code === CODES.agent;
-    if (!codeOk) { err.textContent = 'Code incorrect ou compte désactivé.'; err.style.display = 'block'; return; }
+    const nomUpper = (nom || '').toUpperCase().trim();
+    const compte = comptes.find(c => {
+      if (c.role !== 'agent' || !c.actif || c.code !== code) return false;
+      // Verifier que le matricule/nom/prenom correspond
+      var matU = (c.matricule || '').toUpperCase().trim();
+      var nomU = (c.nom || '').toUpperCase().trim();
+      var prnU = (c.prenom || '').toUpperCase().trim();
+      return matU === nomUpper || nomU === nomUpper || prnU === nomUpper;
+    });
+    if (!compte) { err.textContent = 'Identifiant ou mot de passe incorrect.'; err.style.display = 'block'; return; }
     // Vérifier si bloqué
     const bloques = JSON.parse(localStorage.getItem(CLE_BLOQUES || 'mcc_bloques') || '[]');
     if (bloques.includes(nom)) { err.textContent = 'Ce compte est bloqué. Contactez l\'administrateur.'; err.style.display = 'block'; return; }
@@ -6265,9 +6271,19 @@ async function seConnecter() {
     // (l'ancienne session se déconnectera automatiquement via le watcher)
   } else if (loginTab === 'superviseur') {
     const comptes = getComptes ? getComptes() : [];
-    const compte = comptes.find(c => c.role === 'superviseur' && c.actif && c.code === code);
-    const codeOk = compte || code === CODES.superviseur;
-    if (!codeOk) { err.textContent = 'Code incorrect ou compte désactivé.'; err.style.display = 'block'; return; }
+    const nomUpperSup = (nom || '').toUpperCase().trim();
+    const compte = comptes.find(c => {
+      if (c.role !== 'superviseur' || !c.actif || c.code !== code) return false;
+      // Si nom est saisi, verifier que ca correspond
+      if (nomUpperSup) {
+        var matU = (c.matricule || '').toUpperCase().trim();
+        var nomU = (c.nom || '').toUpperCase().trim();
+        var prnU = (c.prenom || '').toUpperCase().trim();
+        return matU === nomUpperSup || nomU === nomUpperSup || prnU === nomUpperSup;
+      }
+      return true; // Pour superviseur, le matricule est optionnel
+    });
+    if (!compte) { err.textContent = 'Identifiant ou mot de passe incorrect.'; err.style.display = 'block'; return; }
   } else {
     // Admin
     if (code !== CODES.admin) { err.textContent = 'Code incorrect.'; err.style.display = 'block'; return; }
