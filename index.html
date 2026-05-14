@@ -11538,6 +11538,8 @@ function envoyerMessage() {
   if (msgs.length > 50) msgs.splice(50);
   localStorage.setItem(CLE_MSG, JSON.stringify(msgs));
   localStorage.setItem('mcc_msg_nouveau', JSON.stringify(msg));
+  // FIREBASE : envoyer aussi vers Firebase pour que tous les agents recoivent
+  fbSet('messages/' + msg.id, msg);
   fermerMessagerie();
   toast('Message envoyé à tous les agents !', 'ok');
   bip(880, .15);
@@ -11545,10 +11547,26 @@ function envoyerMessage() {
 
 // Agents : polling pour recevoir les messages
 function ecouterMessages() {
-  setInterval(() => {
-    const msgStr = localStorage.getItem('mcc_msg_nouveau');
+  // FIREBASE : ecouter les nouveaux messages en temps reel
+  if (typeof fbOnValue === 'function') {
+    fbOnValue('messages', function(snap) {
+      if (!snap || !snap.exists()) return;
+      var allMsgs = snap.val();
+      var idsRecents = Object.keys(allMsgs).map(Number).sort(function(a,b){return b-a});
+      if (idsRecents.length === 0) return;
+      var dernier = allMsgs[idsRecents[0]];
+      if (dernier.id > msgDernierLu) {
+        msgDernierLu = dernier.id;
+        localStorage.setItem('mcc_msg_lu', dernier.id);
+        afficherNotifMessage(dernier);
+      }
+    });
+  }
+  // Garder aussi le polling localStorage en backup
+  setInterval(function() {
+    var msgStr = localStorage.getItem('mcc_msg_nouveau');
     if (!msgStr) return;
-    const msg = JSON.parse(msgStr);
+    var msg = JSON.parse(msgStr);
     if (msg.id > msgDernierLu) {
       msgDernierLu = msg.id;
       localStorage.setItem('mcc_msg_lu', msg.id);
