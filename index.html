@@ -5667,20 +5667,18 @@ function ptSeConnecter() {
   if (!code) { err.textContent='Entrez votre mot de passe.'; err.style.display='block'; return; }
 
   var comptes = typeof getComptes==='function' ? getComptes() : [];
-  var role = null;
-  if (code === CODES.admin) { role='admin'; }
-  else {
-    var cs = comptes.find(function(c){ return c.role==='superviseur'&&c.actif&&c.code===code; });
-    if (cs) role='superviseur';
-    else if (code===CODES.superviseur && !comptes.find(function(c){ return c.role==='superviseur'&&c.actif; })) role='superviseur';
-    else {
-      var ca = comptes.find(function(c){ return c.role==='agent'&&c.actif&&c.code===code; });
-      if (ca) role='agent';
-      else if (code===CODES.agent) role='agent';
-    }
-  }
+  var nomUpper = (nom || '').toUpperCase().trim();
+  // ═══ DETECTION AUTO : chercher le compte par matricule + mot de passe ═══
+  var compteTrouve = comptes.find(function(cc){
+    if (!cc.actif || cc.code !== code) return false;
+    var matU = (cc.matricule || '').toUpperCase().trim();
+    var nomU = (cc.nom || '').toUpperCase().trim();
+    var prnU = (cc.prenom || '').toUpperCase().trim();
+    return matU === nomUpper || nomU === nomUpper || prnU === nomUpper;
+  });
+  var role = compteTrouve ? compteTrouve.role : null;
   if (!role) {
-    err.textContent='Mot de passe incorrect ou compte désactivé.';
+    err.textContent='Identifiant ou mot de passe incorrect.';
     err.style.display='block';
     var b=document.querySelector('.lbox');
     if(b){b.style.animation='shake .4s ease';setTimeout(function(){b.style.animation='';},400);}
