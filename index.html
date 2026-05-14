@@ -3419,6 +3419,24 @@ label:has(#mod-ecoute) {
         <tbody id="tbl-agents"></tbody>
       </table>
     </div>
+
+    <!-- ═══ AGENTS ACQUISITION & FRONT OFFICE ═══ -->
+    <div class="card" style="margin-top:14px">
+      <h3>👥 Agents Acquisition & Front Office</h3>
+
+      <!-- Barre de boutons bascule + recherche -->
+      <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap">
+        <button onclick="basculerVueAAFO(\'username\')" id="btn-aafo-username" style="padding:8px 14px;border:1.5px solid #7c3aed;border-radius:8px;background:#7c3aed;color:#fff;font-size:12px;font-weight:700;cursor:pointer">👤 Par Username</button>
+        <button onclick="basculerVueAAFO(\'zone\')" id="btn-aafo-zone" style="padding:8px 14px;border:1.5px solid #16a34a;border-radius:8px;background:#fff;color:#16a34a;font-size:12px;font-weight:700;cursor:pointer">📍 Par Zone</button>
+        <button onclick="basculerVueAAFO(\'fonction\')" id="btn-aafo-fonction" style="padding:8px 14px;border:1.5px solid #db2777;border-radius:8px;background:#fff;color:#db2777;font-size:12px;font-weight:700;cursor:pointer">📋 Par Fonction</button>
+        <input type="text" id="aafo-recherche" oninput="chargerTableauAAFO()" placeholder="Rechercher..." style="flex:1;min-width:160px;padding:8px 12px;border:1.5px solid var(--bd);border-radius:8px;font-size:13px;outline:none;background:#fff">
+      </div>
+
+      <table class="sup-table">
+        <thead id="aafo-thead"></thead>
+        <tbody id="tbl-aafo"></tbody>
+      </table>
+    </div>
 <!-- Historique messages supprime -->
 
   </div>
@@ -23028,7 +23046,122 @@ function demanderAide() {
   setInterval(ecouter, 2000);
 })();
 </script>
-<script id="js-show-btn-aide">(function(){function surv(){var b=document.getElementById("btn-aide");if(!b)return;if(typeof roleActif!=="undefined"&&roleActif==="agent"){b.style.display="flex"}else{b.style.display="none"}}setInterval(surv,500);if(document.readyState!=="loading"){surv()}else{document.addEventListener("DOMContentLoaded",surv)}})();</script><script id="js-filtrer-transfert">function filtrerListeTransfert(){var i=document.getElementById("sup-transfert-recherche");if(!i)return;var q=i.value.trim().toLowerCase();var l=document.getElementById("sup-transfert-liste");if(!l)return;var items=l.children;for(var k=0;k<items.length;k++){var txt=items[k].textContent.toLowerCase();items[k].style.display=(!q||txt.indexOf(q)!==-1)?"":"none"}}</script><script id="js-filtrer-perf-agent">function remplirSelectEnCours(){var fec=document.getElementById("perf-filtre-encours");var t=document.getElementById("tbl-agents");if(!fec||!t)return;var rows=t.querySelectorAll("tr");var values=new Set();for(var k=0;k<rows.length;k++){var cells=rows[k].querySelectorAll("td");if(cells.length>=5){var ec=parseInt(cells[4].textContent.trim());if(!isNaN(ec))values.add(ec)}}var current=fec.value;var sorted=Array.from(values).sort(function(a,b){return a-b});fec.innerHTML="<option value=\"\">Filtrer En cours...</option>"+sorted.map(function(v){return "<option value=\""+v+"\""+(String(v)===current?" selected":"")+">"+v+" dossier(s)</option>"}).join("")}function filtrerPerfAgents(){var i=document.getElementById("perf-agent-recherche");var fec=document.getElementById("perf-filtre-encours");if(!i)return;var q=i.value.trim().toLowerCase();var nFiltre=fec&&fec.value.trim()!==""?parseInt(fec.value):null;var t=document.getElementById("tbl-agents");if(!t)return;var rows=t.querySelectorAll("tr");for(var k=0;k<rows.length;k++){var txt=rows[k].textContent.toLowerCase();var matchQ=(!q||txt.indexOf(q)!==-1);var matchEC=true;if(nFiltre!==null){var cells=rows[k].querySelectorAll("td");if(cells.length>=5){var enCours=parseInt(cells[4].textContent.trim())||0;matchEC=enCours===nFiltre}}rows[k].style.display=(matchQ&&matchEC)?"":"none"}}setInterval(function(){var fec=document.getElementById("perf-filtre-encours");if(fec&&document.activeElement!==fec)remplirSelectEnCours()},2000);</script></body>
+<script id="js-show-btn-aide">(function(){function surv(){var b=document.getElementById("btn-aide");if(!b)return;if(typeof roleActif!=="undefined"&&roleActif==="agent"){b.style.display="flex"}else{b.style.display="none"}}setInterval(surv,500);if(document.readyState!=="loading"){surv()}else{document.addEventListener("DOMContentLoaded",surv)}})();</script><script id="js-filtrer-transfert">function filtrerListeTransfert(){var i=document.getElementById("sup-transfert-recherche");if(!i)return;var q=i.value.trim().toLowerCase();var l=document.getElementById("sup-transfert-liste");if(!l)return;var items=l.children;for(var k=0;k<items.length;k++){var txt=items[k].textContent.toLowerCase();items[k].style.display=(!q||txt.indexOf(q)!==-1)?"":"none"}}</script><script id="js-filtrer-perf-agent">function remplirSelectEnCours(){var fec=document.getElementById("perf-filtre-encours");var t=document.getElementById("tbl-agents");if(!fec||!t)return;var rows=t.querySelectorAll("tr");var values=new Set();for(var k=0;k<rows.length;k++){var cells=rows[k].querySelectorAll("td");if(cells.length>=5){var ec=parseInt(cells[4].textContent.trim());if(!isNaN(ec))values.add(ec)}}var current=fec.value;var sorted=Array.from(values).sort(function(a,b){return a-b});fec.innerHTML="<option value=\"\">Filtrer En cours...</option>"+sorted.map(function(v){return "<option value=\""+v+"\""+(String(v)===current?" selected":"")+">"+v+" dossier(s)</option>"}).join("")}function filtrerPerfAgents(){var i=document.getElementById("perf-agent-recherche");var fec=document.getElementById("perf-filtre-encours");if(!i)return;var q=i.value.trim().toLowerCase();var nFiltre=fec&&fec.value.trim()!==""?parseInt(fec.value):null;var t=document.getElementById("tbl-agents");if(!t)return;var rows=t.querySelectorAll("tr");for(var k=0;k<rows.length;k++){var txt=rows[k].textContent.toLowerCase();var matchQ=(!q||txt.indexOf(q)!==-1);var matchEC=true;if(nFiltre!==null){var cells=rows[k].querySelectorAll("td");if(cells.length>=5){var enCours=parseInt(cells[4].textContent.trim())||0;matchEC=enCours===nFiltre}}rows[k].style.display=(matchQ&&matchEC)?"":"none"}}setInterval(function(){var fec=document.getElementById("perf-filtre-encours");if(fec&&document.activeElement!==fec)remplirSelectEnCours()},2000);</script>
+<script id="js-tableau-aafo">
+window._vueAAFO = "username";
+
+function basculerVueAAFO(vue) {
+  window._vueAAFO = vue;
+  // Mettre a jour les boutons
+  var btns = { username: { el: "btn-aafo-username", color: "#7c3aed" }, zone: { el: "btn-aafo-zone", color: "#16a34a" }, fonction: { el: "btn-aafo-fonction", color: "#db2777" } };
+  Object.keys(btns).forEach(function(k){
+    var b = document.getElementById(btns[k].el);
+    if (!b) return;
+    if (k === vue) {
+      b.style.background = btns[k].color;
+      b.style.color = "#fff";
+    } else {
+      b.style.background = "#fff";
+      b.style.color = btns[k].color;
+    }
+  });
+  chargerTableauAAFO();
+}
+
+function chargerTableauAAFO() {
+  var vue = window._vueAAFO || "username";
+  var thead = document.getElementById("aafo-thead");
+  var tbody = document.getElementById("tbl-aafo");
+  if (!thead || !tbody) return;
+  var recherche = (document.getElementById("aafo-recherche")?.value || "").trim().toLowerCase();
+
+  // Recuperer les dossiers du JOUR
+  var aujourdhui = new Date().toLocaleDateString("fr-FR");
+  var tous = JSON.parse(localStorage.getItem(CLE_DOSSIERS) || "[]");
+  var liste = tous.filter(function(d){
+    return d.date === aujourdhui;
+  });
+
+  if (vue === "username") {
+    thead.innerHTML = "<tr><th>Username</th><th>Fonction</th><th>Zone</th><th>Recus</th><th>Acceptes</th><th>Rejetes</th><th>En cours</th><th>Taux</th></tr>";
+    var par = {};
+    liste.forEach(function(d){
+      var k = d.username_agent || "(sans username)";
+      if (!par[k]) par[k] = { username: k, fonction: d.fonction_agent || "-", zone: d.zone_agent || "-", recus: 0, acceptes: 0, rejetes: 0, en_cours: 0 };
+      par[k].recus++;
+      if (d.statut === "accepte") par[k].acceptes++;
+      else if (d.statut === "rejete") par[k].rejetes++;
+      else if (d.statut === "en_cours") par[k].en_cours++;
+    });
+    var rows = Object.values(par).filter(function(r){
+      if (!recherche) return true;
+      return (r.username + " " + r.fonction + " " + r.zone).toLowerCase().indexOf(recherche) !== -1;
+    }).sort(function(a,b){ return b.recus - a.recus; });
+    tbody.innerHTML = rows.map(function(r){
+      var traites = r.acceptes + r.rejetes;
+      var taux = traites > 0 ? Math.round(r.acceptes/traites*100) : 0;
+      var col = taux >= 80 ? "#16a34a" : taux >= 60 ? "#d97706" : "#dc2626";
+      return "<tr><td><strong>" + r.username + "</strong></td><td>" + r.fonction + "</td><td>" + r.zone + "</td><td>" + r.recus + "</td><td style=\"color:#16a34a;font-weight:700\">" + r.acceptes + "</td><td style=\"color:#dc2626;font-weight:700\">" + r.rejetes + "</td><td style=\"color:#d97706;font-weight:700\">" + r.en_cours + "</td><td><span style=\"color:" + col + ";font-weight:700\">" + (traites > 0 ? taux + "%" : "-") + "</span></td></tr>";
+    }).join("") || "<tr><td colspan=\"8\" style=\"text-align:center;color:var(--muted);padding:16px\">Aucune donnée aujourd hui</td></tr>";
+  }
+  else if (vue === "zone") {
+    thead.innerHTML = "<tr><th>Zone</th><th>Nb agents</th><th>Recus</th><th>Acceptes</th><th>Rejetes</th><th>En cours</th><th>Taux</th></tr>";
+    var par = {};
+    liste.forEach(function(d){
+      var k = d.zone_agent || "(sans zone)";
+      if (!par[k]) par[k] = { zone: k, agents: new Set(), recus: 0, acceptes: 0, rejetes: 0, en_cours: 0 };
+      par[k].recus++;
+      if (d.username_agent) par[k].agents.add(d.username_agent);
+      if (d.statut === "accepte") par[k].acceptes++;
+      else if (d.statut === "rejete") par[k].rejetes++;
+      else if (d.statut === "en_cours") par[k].en_cours++;
+    });
+    var rows = Object.values(par).filter(function(r){
+      if (!recherche) return true;
+      return r.zone.toLowerCase().indexOf(recherche) !== -1;
+    }).sort(function(a,b){ return b.recus - a.recus; });
+    tbody.innerHTML = rows.map(function(r){
+      var traites = r.acceptes + r.rejetes;
+      var taux = traites > 0 ? Math.round(r.acceptes/traites*100) : 0;
+      var col = taux >= 80 ? "#16a34a" : taux >= 60 ? "#d97706" : "#dc2626";
+      return "<tr><td><strong>" + r.zone + "</strong></td><td>" + r.agents.size + "</td><td>" + r.recus + "</td><td style=\"color:#16a34a;font-weight:700\">" + r.acceptes + "</td><td style=\"color:#dc2626;font-weight:700\">" + r.rejetes + "</td><td style=\"color:#d97706;font-weight:700\">" + r.en_cours + "</td><td><span style=\"color:" + col + ";font-weight:700\">" + (traites > 0 ? taux + "%" : "-") + "</span></td></tr>";
+    }).join("") || "<tr><td colspan=\"7\" style=\"text-align:center;color:var(--muted);padding:16px\">Aucune donnée aujourd hui</td></tr>";
+  }
+  else if (vue === "fonction") {
+    thead.innerHTML = "<tr><th>Fonction</th><th>Nb agents</th><th>Recus</th><th>Acceptes</th><th>Rejetes</th><th>En cours</th><th>Taux</th></tr>";
+    var par = {};
+    liste.forEach(function(d){
+      var k = d.fonction_agent || "(sans fonction)";
+      if (!par[k]) par[k] = { fonction: k, agents: new Set(), recus: 0, acceptes: 0, rejetes: 0, en_cours: 0 };
+      par[k].recus++;
+      if (d.username_agent) par[k].agents.add(d.username_agent);
+      if (d.statut === "accepte") par[k].acceptes++;
+      else if (d.statut === "rejete") par[k].rejetes++;
+      else if (d.statut === "en_cours") par[k].en_cours++;
+    });
+    var rows = Object.values(par).filter(function(r){
+      if (!recherche) return true;
+      return r.fonction.toLowerCase().indexOf(recherche) !== -1;
+    }).sort(function(a,b){ return b.recus - a.recus; });
+    tbody.innerHTML = rows.map(function(r){
+      var traites = r.acceptes + r.rejetes;
+      var taux = traites > 0 ? Math.round(r.acceptes/traites*100) : 0;
+      var col = taux >= 80 ? "#16a34a" : taux >= 60 ? "#d97706" : "#dc2626";
+      return "<tr><td><strong>" + r.fonction + "</strong></td><td>" + r.agents.size + "</td><td>" + r.recus + "</td><td style=\"color:#16a34a;font-weight:700\">" + r.acceptes + "</td><td style=\"color:#dc2626;font-weight:700\">" + r.rejetes + "</td><td style=\"color:#d97706;font-weight:700\">" + r.en_cours + "</td><td><span style=\"color:" + col + ";font-weight:700\">" + (traites > 0 ? taux + "%" : "-") + "</span></td></tr>";
+    }).join("") || "<tr><td colspan=\"7\" style=\"text-align:center;color:var(--muted);padding:16px\">Aucune donnée aujourd hui</td></tr>";
+  }
+}
+
+// Auto-refresh toutes les 3 secondes
+setInterval(function(){
+  var t = document.getElementById("tbl-aafo");
+  if (t && t.offsetParent !== null) chargerTableauAAFO();
+}, 3000);
+
+// Premier chargement
+setTimeout(chargerTableauAAFO, 1000);
+</script>
+</body>
 </html>
 
 <script>
