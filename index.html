@@ -22547,7 +22547,7 @@ function toggleRetardBloc() {
   }
 })();
 </script>
-</body>
+<style id="css-actif-final">.bloc-dossier-actif{position:relative;border:3px solid #10b981 !important;background:#dcfce7 !important;box-shadow:0 4px 14px rgba(16,185,129,0.4) !important;border-radius:12px !important}.bloc-dossier-actif button[onclick^="ouvrir("]{background:#10b981 !important;color:#fff !important}.bloc-dossier-actif::before{content:"ACTIF";position:absolute;top:-12px;right:14px;background:#10b981;color:#fff;padding:4px 12px;border-radius:12px;font-size:11px;font-weight:800;z-index:100}</style><script id="js-actif-final">(function(){function marquer(){document.querySelectorAll(".bloc-dossier-actif").forEach(function(e){e.classList.remove("bloc-dossier-actif")});if(typeof actifId==="undefined"||!actifId)return;var b=document.querySelectorAll("button[onclick]");b.forEach(function(x){var o=x.getAttribute("onclick")||"";if(o.indexOf("ouvrir('"+actifId+"')")!==-1){var c=x.closest("div");if(c&&c.children.length<2)c=c.parentElement;if(c&&c.children.length<3){var p=c.parentElement;if(p&&p.tagName==="DIV")c=p}if(c)c.classList.add("bloc-dossier-actif")}})}setInterval(marquer,500);if(document.readyState!=="loading"){marquer()}else{document.addEventListener("DOMContentLoaded",marquer)}})();</script></body>
 </html>
 
 <script>
