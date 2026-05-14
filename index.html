@@ -3437,6 +3437,29 @@ label:has(#mod-ecoute) {
         <tbody id="tbl-aafo"></tbody>
       </table>
     </div>
+
+    <!-- ═══ TOP 10 REJETS ═══ -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+
+      <!-- TOP 10 MOTIFS DE REJET -->
+      <div class="card">
+        <h3>🏆 Top 10 motifs de rejet (aujourd hui)</h3>
+        <table class="sup-table">
+          <thead><tr><th>#</th><th>Motif</th><th style="text-align:right">Nombre</th></tr></thead>
+          <tbody id="tbl-top-motifs"></tbody>
+        </table>
+      </div>
+
+      <!-- TOP 10 USERNAMES AVEC LE PLUS DE REJETS -->
+      <div class="card">
+        <h3>🏆 Top 10 usernames avec le plus de rejets (aujourd hui)</h3>
+        <table class="sup-table">
+          <thead><tr><th>#</th><th>Username</th><th>Zone</th><th style="text-align:right">Rejets</th></tr></thead>
+          <tbody id="tbl-top-usernames-rejets"></tbody>
+        </table>
+      </div>
+
+    </div>
 <!-- Historique messages supprime -->
 
   </div>
@@ -23160,6 +23183,63 @@ setInterval(function(){
 
 // Premier chargement
 setTimeout(chargerTableauAAFO, 1000);
+</script>
+
+<script id="js-top-rejets">
+function chargerTop10Rejets() {
+  var tblMotifs = document.getElementById("tbl-top-motifs");
+  var tblUsers = document.getElementById("tbl-top-usernames-rejets");
+  if (!tblMotifs || !tblUsers) return;
+
+  var aujourdhui = new Date().toLocaleDateString("fr-FR");
+  var tous = JSON.parse(localStorage.getItem(CLE_DOSSIERS) || "[]");
+  var rejetes = tous.filter(function(d){
+    return d.date === aujourdhui && d.statut === "rejete";
+  });
+
+  // ── TOP 10 MOTIFS ──
+  var parMotif = {};
+  rejetes.forEach(function(d){
+    var motif = (d.raison_rejet || "Non specifie").trim() || "Non specifie";
+    parMotif[motif] = (parMotif[motif] || 0) + 1;
+  });
+  var motifsRows = Object.entries(parMotif).sort(function(a,b){return b[1]-a[1]}).slice(0,10);
+  if (motifsRows.length === 0) {
+    tblMotifs.innerHTML = "<tr><td colspan=\"3\" style=\"text-align:center;color:var(--muted);padding:16px\">Aucun rejet aujourd hui</td></tr>";
+  } else {
+    tblMotifs.innerHTML = motifsRows.map(function(r, i){
+      var rang = i + 1;
+      var medaille = rang === 1 ? "🥇" : rang === 2 ? "🥈" : rang === 3 ? "🥉" : rang;
+      return "<tr><td style=\"font-weight:700;text-align:center\">" + medaille + "</td><td>" + r[0] + "</td><td style=\"text-align:right;color:#dc2626;font-weight:700\">" + r[1] + "</td></tr>";
+    }).join("");
+  }
+
+  // ── TOP 10 USERNAMES AVEC PLUS DE REJETS ──
+  var parUser = {};
+  rejetes.forEach(function(d){
+    var k = d.username_agent || "(sans username)";
+    if (!parUser[k]) parUser[k] = { username: k, zone: d.zone_agent || "-", rejets: 0 };
+    parUser[k].rejets++;
+  });
+  var usersRows = Object.values(parUser).sort(function(a,b){return b.rejets-a.rejets}).slice(0,10);
+  if (usersRows.length === 0) {
+    tblUsers.innerHTML = "<tr><td colspan=\"4\" style=\"text-align:center;color:var(--muted);padding:16px\">Aucun rejet aujourd hui</td></tr>";
+  } else {
+    tblUsers.innerHTML = usersRows.map(function(r, i){
+      var rang = i + 1;
+      var medaille = rang === 1 ? "🥇" : rang === 2 ? "🥈" : rang === 3 ? "🥉" : rang;
+      return "<tr><td style=\"font-weight:700;text-align:center\">" + medaille + "</td><td><strong>" + r.username + "</strong></td><td>" + r.zone + "</td><td style=\"text-align:right;color:#dc2626;font-weight:700\">" + r.rejets + "</td></tr>";
+    }).join("");
+  }
+}
+
+// Auto-refresh toutes les 3 secondes
+setInterval(function(){
+  var t = document.getElementById("tbl-top-motifs");
+  if (t && t.offsetParent !== null) chargerTop10Rejets();
+}, 3000);
+
+setTimeout(chargerTop10Rejets, 1200);
 </script>
 </body>
 </html>
