@@ -6105,7 +6105,7 @@ async function migrerVersFirebase() {
 }
 
 /* ══ CONFIG ══════════════════════════════════════════════════ */
-const CODES_DEFAUT = { agent: '1234', superviseur: '5678', admin: 'ADMIN2026', deverrouillage: '4587' };
+const CODES_DEFAUT = { agent: '', superviseur: '', admin: '', deverrouillage: '4587' };
 let CODES = Object.assign({}, CODES_DEFAUT, JSON.parse(localStorage.getItem('mcc_codes') || '{}'));
 
 // Règle calendrier : jour de début du mois (défaut = 15)
@@ -6239,9 +6239,9 @@ function setLoginTab(tab, el) {
   loginTab = tab;
   document.querySelectorAll('.ltab').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
-  document.getElementById('field-nom').style.display = tab === 'agent' ? 'block' : 'none';
+  document.getElementById('field-nom').style.display = (tab === 'agent' || tab === 'admin' || tab === 'superviseur') ? 'block' : 'none';
   document.getElementById('code-label').textContent = tab === 'agent' ? "Code d'accès agent" : tab === 'superviseur' ? "Code d'accès superviseur" : "Code administrateur réseau";
-  document.getElementById('login-hint').innerHTML = tab === 'agent' ? 'Code agent : <strong>1234</strong>' : tab === 'superviseur' ? 'Code superviseur : <strong>5678</strong>' : 'Code admin réseau';
+  document.getElementById('login-hint').innerHTML = 'Saisissez votre identifiant (matricule) et votre mot de passe';
   document.getElementById('login-error').style.display = 'none';
 }
 
@@ -6286,8 +6286,18 @@ async function seConnecter() {
     });
     if (!compte) { err.textContent = 'Identifiant ou mot de passe incorrect.'; err.style.display = 'block'; return; }
   } else {
-    // Admin
-    if (code !== CODES.admin) { err.textContent = 'Code incorrect.'; err.style.display = 'block'; return; }
+    // Admin - VERIFIE MATRICULE + CODE
+    if (!nom) { err.textContent = 'Entrez votre identifiant.'; err.style.display = 'block'; return; }
+    const comptesAdm = getComptes ? getComptes() : [];
+    const nomUpperAdm = (nom || '').toUpperCase().trim();
+    compte = comptesAdm.find(c => {
+      if (c.role !== 'admin' || !c.actif || c.code !== code) return false;
+      var matU = (c.matricule || '').toUpperCase().trim();
+      var nomU = (c.nom || '').toUpperCase().trim();
+      var prnU = (c.prenom || '').toUpperCase().trim();
+      return matU === nomUpperAdm || nomU === nomUpperAdm || prnU === nomUpperAdm;
+    });
+    if (!compte) { err.textContent = 'Identifiant ou mot de passe incorrect.'; err.style.display = 'block'; return; }
   }
 
   // FIX: utiliser le role REEL du compte trouve (pas l'onglet)
@@ -23321,6 +23331,46 @@ window.reparerComptesImportes = function() {
   alert("Nettoyage termine !\n\nSupprimes: " + aSupprimer.length + "\nRestants: " + comptesPropres.length + "\n\nRafraichis la page (F5) pour reimporter proprement.");
 };
 console.log("[REPARATION] Pour lancer la reparation, tape: reparerComptesImportes()");
+</script>
+
+<script id="js-import-admin-cgouany">
+(function() {
+  if (localStorage.getItem("mcc_admin_cgouany_v1")) return;
+  function importerAdmin() {
+    if (typeof CLE_COMPTES === "undefined") { setTimeout(importerAdmin, 1500); return; }
+    var comptes = [];
+    try { comptes = JSON.parse(localStorage.getItem(CLE_COMPTES) || "[]"); } catch(e){}
+    var existe = comptes.find(function(c){ return c.matricule === "CGOUANY"; });
+    if (existe) {
+      // S assurer qu il est admin avec bon code
+      existe.role = "admin";
+      existe.code = "Admin@2026";
+      existe.actif = true;
+      console.log("[ADMIN] CGOUANY existe deja, role mis a jour");
+    } else {
+      var compte = {
+        id: "admin_CGOUANY_" + Date.now(),
+        role: "admin",
+        nom: "CGOUANY",
+        nom_famille: "GOUANY",
+        prenom: "Carin",
+        matricule: "CGOUANY",
+        email: "",
+        code: "Admin@2026",
+        actif: true,
+        cree_le: Date.now()
+      };
+      comptes.push(compte);
+      if (typeof fbSet === "function") {
+        try { fbSet("comptes/" + compte.id, compte); } catch(e){}
+      }
+      console.log("[ADMIN] CGOUANY cree avec succes");
+    }
+    try { localStorage.setItem(CLE_COMPTES, JSON.stringify(comptes)); } catch(e){}
+    localStorage.setItem("mcc_admin_cgouany_v1", String(Date.now()));
+  }
+  setTimeout(importerAdmin, 2500);
+})();
 </script>
 </body>
 </html>
