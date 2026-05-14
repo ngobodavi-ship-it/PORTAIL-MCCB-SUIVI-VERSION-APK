@@ -5302,6 +5302,11 @@ label:has(#mod-ecoute) {
           <input type="tel" id="wa-agent" placeholder="ex: 064256205" maxlength="9" minlength="9" inputmode="numeric" pattern="[0-9]*" autocomplete="tel" oninput="validerNumero(this)" onblur="validerNumero(this)">
           <div class="hint">Entrez votre numéro une seule fois — il sera mémorisé automatiquement</div>
         </div>
+        <div class="fld" style="margin-bottom:6px">
+          <label>Username <span>*</span></label>
+          <input type="text" id="username-agent" placeholder="ex: dav_centre" maxlength="40" autocomplete="off" style="width:100%;padding:12px;border:1.5px solid var(--bd);border-radius:8px;font-size:16px;outline:none;-webkit-appearance:none;box-sizing:border-box">
+          <div class="hint">Entrez votre username une seule fois — il sera mémorisé automatiquement</div>
+        </div>
       </div>
 
       <div class="section-title">Numéros à identifier</div>
@@ -17157,23 +17162,30 @@ seDeconnecter = function() {
 
 
 var CLE_AGENT   = 'mcc_wa_agent';
+var CLE_USERNAME = 'mcc_username_agent';
 // CLE_DOSSIERS partagé avec MC
 
 /* ── Agent mémorisé ── */
 function chargerAgent() {
   var num = localStorage.getItem(CLE_AGENT);
-  if (num) {
-    document.getElementById('agent-num-display').textContent = num;
+  var usr = localStorage.getItem(CLE_USERNAME);
+  if (num && usr) {
+    var disp = document.getElementById('agent-num-display');
+    if (disp) disp.innerHTML = num + ' <span style="font-size:12px;color:#6b7280;font-weight:500">(@' + usr + ')</span>';
     document.getElementById('agent-saved').style.display = 'block';
     document.getElementById('agent-input').style.display  = 'none';
   } else {
     document.getElementById('agent-saved').style.display = 'none';
     document.getElementById('agent-input').style.display  = 'block';
+    if (num) { var w = document.getElementById('wa-agent'); if (w) w.value = num; }
+    if (usr) { var u = document.getElementById('username-agent'); if (u) u.value = usr; }
   }
 }
 function changerAgent() {
   localStorage.removeItem(CLE_AGENT);
+  localStorage.removeItem(CLE_USERNAME);
   document.getElementById('wa-agent').value = '';
+  var u = document.getElementById('username-agent'); if (u) u.value = '';
   document.getElementById('agent-saved').style.display = 'none';
   document.getElementById('agent-input').style.display  = 'block';
   document.getElementById('wa-agent').focus();
@@ -17457,6 +17469,10 @@ async function soumettre() {
 
   if (!waAgent) { afficherErreur("Entrez le numéro WhatsApp de l'agent acquisition."); return; }
   if (waAgent.length !== 9) { afficherErreur("Le numéro WhatsApp doit contenir exactement 9 chiffres."); return; }
+  var usernameAgent = (localStorage.getItem(CLE_USERNAME) || (document.getElementById('username-agent') ? document.getElementById('username-agent').value.trim() : '')).trim();
+  if (!usernameAgent) { afficherErreur("Entrez votre username."); return; }
+  if (usernameAgent.length < 2) { afficherErreur("Le username doit contenir au moins 2 caracteres."); return; }
+  localStorage.setItem(CLE_USERNAME, usernameAgent);
   if (!num1)    { afficherErreur("Entrez au moins le numéro MTN 1."); return; }
   if (num1.length !== 9) { afficherErreur("Le numéro MTN 1 doit contenir exactement 9 chiffres."); return; }
 
@@ -17530,6 +17546,7 @@ async function soumettre() {
     var dossier = {
       id:              id,
       wa_agent:        waAgent,
+      username_agent:  usernameAgent,
       numero_mtn:      numeros[0],          // numéro principal
       numeros_all:     numeros,             // tous les numéros
       heure_reception: heure,
