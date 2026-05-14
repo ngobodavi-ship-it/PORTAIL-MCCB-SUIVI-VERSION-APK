@@ -9291,12 +9291,20 @@ function chargerSuperviseur() {
   });
   document.getElementById('tbl-agents').innerHTML = Object.entries(parAgent).map(([nom,s]) => {
     const taux = s.total ? Math.round(s.acceptes/s.total*100) : 0;
+    const enCours = s.total - s.acceptes - s.rejetes;
+    var pres = {};
+    try { pres = JSON.parse(localStorage.getItem(CLE_PRESENCE)||"{}"); } catch(e){}
+    var p = pres[nom];
+    var actif = p && p.lastActive && ((Date.now() - p.lastActive)/60000 < 5);
+    var statutBadge = actif
+      ? '<span style="background:#dcfce7;color:#16a34a;padding:3px 9px;border-radius:10px;font-size:11px;font-weight:700">🟢 Actif</span>'
+      : '<span style="background:#fee2e2;color:#dc2626;padding:3px 9px;border-radius:10px;font-size:11px;font-weight:700">🔴 Inactif</span>';
     const c = taux>=80?'#16a34a':taux>=60?'#d97706':'#dc2626';
     return `<tr><td><strong>${nom}</strong></td><td>${s.total}</td>
       <td style="color:#16a34a;font-weight:700">${s.acceptes}</td>
       <td style="color:#dc2626;font-weight:700">${s.rejetes}</td>
-      <td><span style="color:${c};font-weight:700">${taux}%</span></td></tr>`;
-  }).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:16px">Aucune donnée</td></tr>';
+      <td style="color:#d97706;font-weight:700">${enCours}</td><td><span style="color:${c};font-weight:700">${taux}%</span></td><td>${statutBadge}</td></tr>`;
+  }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:16px">Aucune donnée</td></tr>';
 
   // Graphiques
   const heuresRecus    = Array(24).fill(0);
