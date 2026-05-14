@@ -2836,7 +2836,7 @@ label:has(#mod-ecoute) {
     </div>
     <div class="hdr-r">
       <input type="text" class="search-inp" id="search-inp" placeholder="N° MTN ou nom/prénom..." oninput="rechercher(this.value)" style="display:none">
-      <button id="btn-msg" onclick="ouvrirMessagerie()" style="display:none;padding:5px 12px;border:none;border-radius:6px;background:#FFC300;color:#1A1A1A;font-size:11px;font-weight:700;cursor:pointer">✉ Message</button>
+      <button id="btn-msg" onclick="ouvrirMessagerie('mc')" style="display:none;padding:5px 12px;border:none;border-radius:6px;background:#FFC300;color:#1A1A1A;font-size:11px;font-weight:700;cursor:pointer">✉ Message MC</button><button id="btn-msg-aafo" onclick="ouvrirMessagerie('aafo')" style="display:none;padding:5px 12px;border:none;border-radius:6px;background:#2563eb;color:#fff;font-size:11px;font-weight:700;cursor:pointer;margin-left:4px">✉ Message AA/FO</button>
       <button id="btn-pause" onclick="togglePause()">☕ Pause <span id="pause-timer"></span></button><button id="btn-aide" onclick="demanderAide()" style="display:none;padding:5px 13px;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;background:#dc2626;color:#fff;margin-left:6px;animation:pulseAide 2s infinite">🆘 Aide</button>
       <span class="mode-local">MODE LOCAL</span>
       <span class="badge-role" id="badge-role">Agent</span>
@@ -5105,7 +5105,7 @@ label:has(#mod-ecoute) {
 <!-- MESSAGERIE SUPERVISEUR -->
 <div id="msg-overlay" onclick="if(event.target===this)fermerMessagerie()">
   <div id="msg-panel">
-    <h3>✉ Message aux agents <span style="font-size:11px;font-weight:400;color:var(--muted)">(tous les agents connectés recevront une notification)</span></h3>
+    <h3 id="msg-titre">✉ Message aux agents <span style="font-size:11px;font-weight:400;color:var(--muted)">(tous les agents connectés recevront une notification)</span></h3>
     <div class="msg-types">
       <button class="msg-type-btn sel-normal" id="btn-type-normal" onclick="setMsgType('normal')">📢 Normal</button>
       <button class="msg-type-btn" id="btn-type-urgent" onclick="setMsgType('urgent')">🚨 Urgent</button>
@@ -5629,7 +5629,7 @@ function ptSeConnecter() {
       }
       ['tab-admin','tab-agent','tab-sup','tab-hist','tab-gsm-sup','tab-flux','tab-reporting','tab-imp-notes','tab-imp-planning'].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display='block';});
       var tg=document.getElementById('tab-gsm');if(tg)tg.style.display='none';
-      var bm=document.getElementById('btn-msg');if(bm)bm.style.display='block';
+      var bm=document.getElementById('btn-msg');if(bm)bm.style.display='block';var bma=document.getElementById('btn-msg-aafo');if(bma)bma.style.display='block';
       var bv=document.getElementById('btn-vider');if(bv)bv.style.display='block';
     } catch(e){}
     sauverSession();
@@ -5642,7 +5642,7 @@ function ptSeConnecter() {
     document.getElementById('badge-role').classList.add('sup');
     ['tab-agent','tab-sup','tab-hist','tab-gsm-sup','tab-flux','tab-reporting','tab-ecoute','tab-imp-notes','tab-imp-planning'].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display='block';});
     var tg=document.getElementById('tab-gsm');if(tg)tg.style.display='none';
-    document.getElementById('btn-msg').style.display='block';
+    document.getElementById('btn-msg').style.display='block';var bma2=document.getElementById('btn-msg-aafo');if(bma2)bma2.style.display='block';
     document.getElementById('stats-bar').style.display='flex';
     var cSup2 = (typeof getComptes==='function' ? getComptes() : []).find(function(x){ return x.role==='superviseur'&&x.actif&&x.nom===nom; });
     appliquerModulesSup(cSup2);
@@ -6447,7 +6447,7 @@ function seDeconnecter() {
   });
 
   // Cacher les éléments du header
-  document.getElementById('btn-msg').style.display   = 'none';
+  document.getElementById('btn-msg').style.display   = 'none';var bmah=document.getElementById('btn-msg-aafo');if(bmah)bmah.style.display='none';
   document.getElementById('btn-vider').style.display = 'none';
   document.getElementById('search-inp').style.display = 'none';
 
