@@ -8682,6 +8682,7 @@ function carteHtml(d) {
       ${stT}
     </div>
     <div class="dos-imgs">${imgR}${imgL}</div>
+    ${d.motif_transfert ? `<div style="background:linear-gradient(135deg,#dbeafe,#bfdbfe);border-left:4px solid #2563eb;padding:8px 10px;margin-top:8px;border-radius:6px;font-size:11px;color:#1e3a8a"><strong>📝 Motif transfert :</strong> ${d.motif_transfert}${d.transfere_par ? `<div style="font-size:10px;color:#3b82f6;margin-top:2px">Par : ${d.transfere_par}</div>` : ''}</div>` : ''}
     ${d.statut === 'en_attente'
       ? `<button class="btn btn-p" style="width:100%;margin-top:6px;font-size:11px;padding:6px" onclick="prendre('${d.id}')">Prendre ce dossier</button>`
       : `<button class="btn" style="width:100%;margin-top:6px;font-size:12px;padding:8px;background:#FFC300;color:#1A1A1A;border:none;font-weight:700;border-radius:8px;box-shadow:0 2px 6px rgba(255,195,0,0.3);letter-spacing:0.3px;cursor:pointer" onclick="ouvrir('${d.id}')">Voir le dossier</button>`
@@ -18279,6 +18280,8 @@ function confirmerTransfert() {
     statut: 'en_cours',
     agent_saisie: agent,
     heure_prise: new Date().toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' }),
+    motif_transfert: motif || '',
+    transfere_par: anciensAgent || 'Superviseur',
     note: (d.note ? d.note + ' | ' : '') + 'Transfert vers ' + agent + (motif ? ' : ' + motif : '') + ' (' + new Date().toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' }) + ')'
   });
   fermerTransfert();
