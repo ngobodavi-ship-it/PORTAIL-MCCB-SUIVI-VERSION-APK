@@ -9135,8 +9135,15 @@ function ouvrirModalRejeter(id) {
 }
 
 function confirmerAccepter() {
+  alert('[A1] start - modalDossierId=' + modalDossierId);
   document.getElementById('modal-accepter').style.display = 'none';
-  cloturer(modalDossierId, 'accepte');
+  alert('[A2] modal cachee, j appelle cloturer');
+  try {
+    cloturer(modalDossierId, 'accepte');
+    alert('[A3] cloturer OK');
+  } catch(e) {
+    alert('[A-ERREUR] ' + e.message);
+  }
   modalDossierId = null;
 }
 
