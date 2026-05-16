@@ -9336,8 +9336,28 @@ function cloturer(id, statut) {
           if (typeof _cbxRefresh === 'function') _cbxRefresh(selId);
         });
       } catch(e){}
+      // Re-tenter dans 800ms si le champ etait pas pret
+      setTimeout(function(){
+        try {
+          var fNum2 = document.getElementById('f-numero');
+          if (fNum2 && !fNum2.value && premierNumero && premierNumero.length === 9) {
+            fNum2.value = premierNumero;
+            fNum2.style.background = '#fff8e1';
+            fNum2.style.borderColor = '#198754';
+            fNum2.focus();
+            setTimeout(function(){ fNum2.style.background = ''; fNum2.style.borderColor = ''; }, 2500);
+          }
+          var fAction2 = document.getElementById('f-action');
+          if (fAction2 && !fAction2.value) {
+            var cible2 = statut === 'accepte' ? 'Accepté' : 'A rejeter';
+            var opts2 = Array.from(fAction2.options).map(function(o){ return o.value; });
+            if (opts2.indexOf(cible2) !== -1) fAction2.value = cible2;
+            if (typeof _cbxRefresh === 'function') _cbxRefresh('f-action');
+          }
+        } catch(e){}
+      }, 800);
     } catch(e) { console.warn('[pré-remplissage GSM]', e); }
-  }, 150);
+  }, 500);
 
   toast('Dossier ' + (statut === 'accepte' ? 'accepté ✓' : 'rejeté') + ' — Complétez la saisie GSM', statut === 'accepte' ? 'ok' : 'er');
 }
