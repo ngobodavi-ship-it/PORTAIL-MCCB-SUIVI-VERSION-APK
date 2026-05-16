@@ -9296,8 +9296,10 @@ function cloturer(id, statut) {
   // ═══ Pré-remplir automatiquement le formulaire ═══
   // Le numéro qui vient d'être accepté/rejeté apparaît dans le champ NUMÉRO
   setTimeout(function(){
+    alert('[PR1] timeout declenche. premierNumero=' + premierNumero);
     try {
       var fNum = document.getElementById('f-numero');
+      alert('[PR2] fNum trouve? ' + (fNum ? 'OUI' : 'NON'));
       if (fNum && premierNumero.length === 9) {
         fNum.value = premierNumero;
         // Petite animation de mise en avant
