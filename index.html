@@ -9089,7 +9089,17 @@ function sauverLocal(id, champs) {
   try {
     localStorage.setItem(CLE_DOSSIERS, JSON.stringify(liste));
   } catch(e) {
-    localStorage.setItem(CLE_DOSSIERS, JSON.stringify(liste.slice(0, 30)));
+    try {
+      var liteListe = liste.slice(0, 30).map(function(d){
+        var copy = Object.assign({}, d);
+        copy.photo_recto = null; copy.photo_verso = null;
+        copy.photo_live = null; copy.capture_appel = null;
+        return copy;
+      });
+      localStorage.setItem(CLE_DOSSIERS, JSON.stringify(liteListe));
+    } catch(e2) {
+      try { localStorage.removeItem(CLE_DOSSIERS); } catch(e3){}
+    }
   }
   // Mettre à jour le cache Firebase aussi
   if (window._cacheDossiersFB) {
@@ -9135,15 +9145,8 @@ function ouvrirModalRejeter(id) {
 }
 
 function confirmerAccepter() {
-  alert('[A1] start - modalDossierId=' + modalDossierId);
   document.getElementById('modal-accepter').style.display = 'none';
-  alert('[A2] modal cachee, j appelle cloturer');
-  try {
-    cloturer(modalDossierId, 'accepte');
-    alert('[A3] cloturer OK');
-  } catch(e) {
-    alert('[A-ERREUR] ' + e.message);
-  }
+  try { cloturer(modalDossierId, 'accepte'); } catch(e) { console.error('cloturer:', e); }
   modalDossierId = null;
 }
 
