@@ -2082,6 +2082,46 @@ label:has(#mod-ecoute) {
   display: none !important;
 }
 </style>
+<script>
+// PATCH: localStorage robuste contre QuotaExceededError
+(function(){
+  var origSet = Storage.prototype.setItem;
+  Storage.prototype.setItem = function(key, value) {
+    try {
+      return origSet.call(this, key, value);
+    } catch(e) {
+      console.warn('[QUOTA] cle ' + key + ' trop grosse, on supprime');
+      try { this.removeItem(key); } catch(e2){}
+      // On essaie de re-ecrire la cle avec une version reduite si c est du JSON
+      try {
+        if (typeof value === 'string' && value.length > 100) {
+          var data = JSON.parse(value);
+          if (Array.isArray(data) && data.length > 10) {
+            // Garder seulement 10 elements sans gros champs
+            var lite = data.slice(0, 10).map(function(item){
+              if (item && typeof item === 'object') {
+                var copy = {};
+                for (var k in item) {
+                  var v = item[k];
+                  // Supprimer les images base64
+                  if (typeof v === 'string' && v.length > 1000 && v.indexOf('data:image') === 0) continue;
+                  if (Array.isArray(v) && v.length > 0 && typeof v[0] === 'string' && v[0].indexOf('data:image') === 0) continue;
+                  copy[k] = v;
+                }
+                return copy;
+              }
+              return item;
+            });
+            try { origSet.call(this, key, JSON.stringify(lite)); } catch(e3){}
+          }
+        }
+      } catch(e4){}
+      return null;
+    }
+  };
+  console.log('[PATCH] localStorage robustifie contre QuotaExceeded');
+})();
+</script>
 </head>
 <body>
 
