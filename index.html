@@ -2,20 +2,52 @@
 <html lang="fr">
 <head>
 <script>
-/* PATCH localStorage robuste v3 - preserve les images */
+/* PATCH localStorage robuste v4 - protege mcc_comptes */
 (function(){
   if (typeof Storage === 'undefined') return;
   var origSet = Storage.prototype.setItem;
+  // Cles CRITIQUES qui ne doivent JAMAIS etre tronquees (sinon login casse)
+  var CLES_PROTEGEES = ['mcc_comptes', 'mcc_session', 'mcc_user', 'mcc_role', 'mcc_token', 'auth', 'session'];
   Storage.prototype.setItem = function(key, value) {
     try {
       return origSet.call(this, key, value);
     } catch(e) {
-      // Quota plein : on essaie de garder MOINS d'entrees mais avec leurs images
+      // Cle critique (comptes, auth) : ne JAMAIS tronquer - faire de la place ailleurs
+      var estCritique = false;
+      for (var i = 0; i < CLES_PROTEGEES.length; i++) {
+        if (key && key.indexOf(CLES_PROTEGEES[i]) !== -1) { estCritique = true; break; }
+      }
+      if (estCritique) {
+        // Liberer de l'espace en supprimant les caches non critiques
+        try {
+          var aSupprimer = [];
+          for (var j = 0; j < this.length; j++) {
+            var k = this.key(j);
+            if (!k) continue;
+            var protege = false;
+            for (var p = 0; p < CLES_PROTEGEES.length; p++) {
+              if (k.indexOf(CLES_PROTEGEES[p]) !== -1) { protege = true; break; }
+            }
+            if (!protege) aSupprimer.push(k);
+          }
+          aSupprimer.forEach(function(k){ try { origSet.call(this, k, ''); } catch(e){} }.bind(this));
+          aSupprimer.forEach(function(k){ try { this.removeItem(k); } catch(e){} }.bind(this));
+          // Reessayer la cle critique
+          try {
+            origSet.call(this, key, value);
+            console.warn('[QUOTA] ' + key + ' sauvee apres nettoyage des caches non critiques');
+            return null;
+          } catch(eRetry) {
+            console.error('[QUOTA CRITIQUE] Impossible de sauver ' + key + ' meme apres nettoyage');
+          }
+        } catch(eClean) {}
+        return null;
+      }
+      // Cle non critique (dossiers, gsm, etc.) : on peut tronquer
       try {
         if (typeof value === 'string' && value.length > 1000) {
           var data = JSON.parse(value);
           if (Array.isArray(data) && data.length > 5) {
-            // Strategie 1 : essayer avec 50 entrees completes (avec images)
             for (var n = 50; n >= 5; n = Math.floor(n / 2)) {
               try {
                 var subset = data.slice(0, n);
@@ -24,7 +56,6 @@
                 return null;
               } catch(eN) {}
             }
-            // Strategie 2 : si meme 5 entrees ne passent pas, garder 10 sans grosses images
             try {
               var lite = data.slice(0, 10).map(function(item){
                 if (item && typeof item === 'object') {
@@ -43,7 +74,6 @@
                 return item;
               });
               origSet.call(this, key, JSON.stringify(lite));
-              console.warn('[QUOTA] ' + key + ' tronque sans images');
               return null;
             } catch(eF){
               try { this.removeItem(key); } catch(e2){}
